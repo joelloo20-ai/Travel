@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
+import { useWindowTextures } from './buildingTextures';
 
 export interface BuildingSpec {
   x: number;
@@ -16,26 +17,97 @@ interface SkyscraperClusterProps {
   nightLights: number;
 }
 
-/** A cluster of simple glass/concrete towers used for background skylines. */
+function hashSeed(text: string): number {
+  let h = 0;
+  for (let i = 0; i < text.length; i++) h = (Math.imul(h, 31) + text.charCodeAt(i)) | 0;
+  return (h >>> 0) / 4294967295;
+}
+
+interface TexturedBoxProps {
+  width: number;
+  height: number;
+  depth: number;
+  position?: [number, number, number];
+  seed: number;
+  nightLights: number;
+  facadeRoughness?: number;
+  facadeMetalness?: number;
+}
+
+/** A box tower with a generated lit-window facade on its four side faces. */
+export function TexturedBox({
+  width,
+  height,
+  depth,
+  position = [0, 0, 0],
+  seed,
+  nightLights,
+  facadeRoughness = 0.5,
+  facadeMetalness = 0.35,
+}: TexturedBoxProps) {
+  const { colorMap, emissiveMap } = useWindowTextures(width, height, seed);
+
+  const materials = useMemo(() => {
+    const facade = new THREE.MeshStandardMaterial({
+      map: colorMap,
+      emissiveMap,
+      emissive: '#ffffff',
+      emissiveIntensity: nightLights * 1.1,
+      roughness: facadeRoughness,
+      metalness: facadeMetalness,
+    });
+    const roof = new THREE.MeshStandardMaterial({ color: '#1c2229', roughness: 0.8, metalness: 0.1 });
+    const base = new THREE.MeshStandardMaterial({ color: '#0d1114', roughness: 0.9 });
+    return [facade, facade, roof, base, facade, facade];
+  }, [colorMap, emissiveMap, nightLights, facadeRoughness, facadeMetalness]);
+
+  return (
+    <mesh position={position} material={materials} castShadow receiveShadow>
+      <boxGeometry args={[width, height, depth]} />
+    </mesh>
+  );
+}
+
+/** A single background tower with a generated lit-window facade and roof clutter. */
+function Building({ b, index, glowColor, nightLights }: { b: BuildingSpec; index: number; glowColor: string; nightLights: number }) {
+  const seed = index * 0.618 + b.height * 0.13 + hashSeed(b.color);
+  const hasRoofDetail = index % 3 === 0;
+  const hasSetback = index % 4 === 1 && b.height > 1.6;
+
+  return (
+    <group position={[b.x, 0, b.z]}>
+      <TexturedBox width={b.width} height={b.height} depth={b.depth} position={[0, b.height / 2, 0]} seed={seed} nightLights={nightLights} />
+      {hasSetback && (
+        <mesh position={[0, b.height + b.height * 0.06, 0]} castShadow>
+          <boxGeometry args={[b.width * 0.62, b.height * 0.12, b.depth * 0.62]} />
+          <meshStandardMaterial color="#1c2229" roughness={0.7} metalness={0.2} />
+        </mesh>
+      )}
+      {hasRoofDetail && (
+        <mesh position={[b.width * 0.2, b.height + 0.06, b.depth * 0.15]} castShadow>
+          <boxGeometry args={[b.width * 0.12, 0.1, b.depth * 0.12]} />
+          <meshStandardMaterial color="#2a3138" roughness={0.8} />
+        </mesh>
+      )}
+      <mesh position={[0, b.height + 0.005, 0]}>
+        <boxGeometry args={[b.width * 0.98, 0.01, b.depth * 0.98]} />
+        <meshStandardMaterial
+          color={glowColor}
+          emissive={glowColor}
+          emissiveIntensity={nightLights * 1.4}
+          toneMapped={false}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+/** A cluster of glass/concrete towers with lit-window facades, used for background skylines. */
 export function SkyscraperCluster({ buildings, glowColor, nightLights }: SkyscraperClusterProps) {
   return (
     <group>
       {buildings.map((b, i) => (
-        <group key={i} position={[b.x, 0, b.z]}>
-          <mesh position={[0, b.height / 2, 0]} castShadow receiveShadow>
-            <boxGeometry args={[b.width, b.height, b.depth]} />
-            <meshStandardMaterial color={b.color} roughness={0.5} metalness={0.4} />
-          </mesh>
-          <mesh position={[0, b.height + 0.005, 0]}>
-            <boxGeometry args={[b.width * 0.98, 0.01, b.depth * 0.98]} />
-            <meshStandardMaterial
-              color={glowColor}
-              emissive={glowColor}
-              emissiveIntensity={nightLights * 1.4}
-              toneMapped={false}
-            />
-          </mesh>
-        </group>
+        <Building key={i} b={b} index={i} glowColor={glowColor} nightLights={nightLights} />
       ))}
     </group>
   );
@@ -106,10 +178,12 @@ interface PagodaTowerProps {
   roofColor: string;
   glowColor: string;
   nightLights: number;
+  /** Use a lit-window facade on the tier bodies (modern tech tower) instead of flat plaster/stone. */
+  windowed?: boolean;
 }
 
 /** A tiered pagoda/castle silhouette built from stacked boxes with overhanging roof slabs. */
-export function PagodaTower({ tiers, color, roofColor, glowColor, nightLights }: PagodaTowerProps) {
+export function PagodaTower({ tiers, color, roofColor, glowColor, nightLights, windowed = false }: PagodaTowerProps) {
   const baseYs = useMemo(() => {
     const offsets: number[] = [];
     let cumulative = 0;
@@ -125,10 +199,23 @@ export function PagodaTower({ tiers, color, roofColor, glowColor, nightLights }:
     const roofY = baseYs[i] + tier.height;
     return (
       <group key={i}>
-        <mesh position={[0, bodyY, 0]} castShadow receiveShadow>
-          <boxGeometry args={[tier.width, tier.height, tier.depth]} />
-          <meshStandardMaterial color={color} roughness={0.7} metalness={0.1} />
-        </mesh>
+        {windowed ? (
+          <TexturedBox
+            width={tier.width}
+            depth={tier.depth}
+            height={tier.height}
+            position={[0, bodyY, 0]}
+            seed={i * 2.3 + 4.1}
+            nightLights={nightLights}
+            facadeRoughness={0.4}
+            facadeMetalness={0.4}
+          />
+        ) : (
+          <mesh position={[0, bodyY, 0]} castShadow receiveShadow>
+            <boxGeometry args={[tier.width, tier.height, tier.depth]} />
+            <meshStandardMaterial color={color} roughness={0.7} metalness={0.1} />
+          </mesh>
+        )}
         <mesh position={[0, roofY, 0]} castShadow>
           <boxGeometry
             args={[tier.width + tier.roofOverhang, Math.max(tier.height * 0.12, 0.03), tier.depth + tier.roofOverhang]}

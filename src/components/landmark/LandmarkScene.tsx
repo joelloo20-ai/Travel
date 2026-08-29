@@ -29,9 +29,35 @@ const CONDITION_OVERCAST_BOOST: Record<string, number> = {
 function GroundPlaza({ color }: { color: string }) {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} receiveShadow>
-      <circleGeometry args={[16, 48]} />
+      <circleGeometry args={[22, 48]} />
       <meshStandardMaterial color={color} roughness={0.92} metalness={0.03} />
     </mesh>
+  );
+}
+
+/** A warm highlight beam that calls the hero landmark out from the surrounding skyline. */
+function LandmarkHighlight({ glow, dayPhase, goldenPhase }: { glow: string; dayPhase: number; goldenPhase: number }) {
+  const target = useMemo(() => {
+    const object = new THREE.Object3D();
+    object.position.set(0, 1.6, 0);
+    return object;
+  }, []);
+  const intensity = 1.4 + (1 - dayPhase) * 2.2 + goldenPhase * 1.2;
+
+  return (
+    <>
+      <primitive object={target} />
+      <spotLight
+        position={[4.5, 7, 5]}
+        target={target}
+        color={glow}
+        intensity={intensity}
+        angle={0.32}
+        penumbra={0.65}
+        distance={20}
+        decay={1.6}
+      />
+    </>
   );
 }
 
@@ -71,6 +97,7 @@ function SceneContent({ destination, weather, localTime }: SceneContentProps) {
         overcast={overcast}
         glow={destination.glow}
       />
+      <LandmarkHighlight glow={destination.glow} dayPhase={localTime.dayPhase} goldenPhase={localTime.goldenPhase} />
 
       {destination.hasWater ? (
         <Water
@@ -103,13 +130,13 @@ function SceneContent({ destination, weather, localTime }: SceneContentProps) {
       <OrbitControls
         enablePan={false}
         enableZoom
-        minDistance={8}
-        maxDistance={18}
+        minDistance={9}
+        maxDistance={24}
         minPolarAngle={Math.PI * 0.28}
         maxPolarAngle={Math.PI * 0.47}
         rotateSpeed={0.4}
         autoRotate
-        autoRotateSpeed={0.35}
+        autoRotateSpeed={0.28}
         enableDamping
         dampingFactor={0.08}
         target={[0, 2, 0]}
@@ -146,7 +173,7 @@ export function LandmarkScene({ destination, weather, localTime, loading }: Land
           dpr={[1, 1.75]}
           shadows
           gl={{ antialias: true, alpha: false }}
-          camera={{ position: [0, 4.6, 11.5], fov: 42, near: 0.1, far: 150 }}
+          camera={{ position: [0, 5.4, 14], fov: 45, near: 0.1, far: 150 }}
         >
           <SceneContent destination={destination} weather={weather} localTime={localTime} />
         </Canvas>

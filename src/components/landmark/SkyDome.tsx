@@ -181,7 +181,45 @@ function StarField({ dayPhase }: { dayPhase: number }) {
   );
 }
 
+function useMoonTexture(): THREE.CanvasTexture {
+  return useMemo(() => {
+    const size = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d')!;
+
+    const gradient = ctx.createRadialGradient(size * 0.4, size * 0.38, size * 0.05, size * 0.5, size * 0.5, size * 0.52);
+    gradient.addColorStop(0, '#ffffff');
+    gradient.addColorStop(0.55, '#e6ecf5');
+    gradient.addColorStop(1, '#aab4c8');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    const craters = [
+      [0.38, 0.32, 0.1],
+      [0.62, 0.28, 0.06],
+      [0.5, 0.58, 0.13],
+      [0.68, 0.62, 0.07],
+      [0.3, 0.65, 0.055],
+    ];
+    for (const [cx, cy, cr] of craters) {
+      ctx.fillStyle = 'rgba(140, 150, 170, 0.35)';
+      ctx.beginPath();
+      ctx.arc(size * cx, size * cy, size * cr, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    return texture;
+  }, []);
+}
+
 function SunMoonDisc({ sunElevation, dayPhase, glow }: { sunElevation: number; dayPhase: number; glow: string }) {
+  const moonTexture = useMoonTexture();
   const sunRef = useRef<THREE.Group>(null);
   const moonRef = useRef<THREE.Group>(null);
   const sunMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
@@ -216,8 +254,8 @@ function SunMoonDisc({ sunElevation, dayPhase, glow }: { sunElevation: number; d
       </group>
       <group ref={moonRef}>
         <mesh>
-          <sphereGeometry args={[1.05, 24, 24]} />
-          <meshBasicMaterial ref={moonMaterialRef} color="#e4ecfb" toneMapped={false} transparent depthWrite={false} />
+          <sphereGeometry args={[1, 32, 32]} />
+          <meshBasicMaterial ref={moonMaterialRef} map={moonTexture} toneMapped={false} transparent depthWrite={false} />
         </mesh>
       </group>
     </>

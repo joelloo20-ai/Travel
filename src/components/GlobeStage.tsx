@@ -1,4 +1,4 @@
-import { useGlobeAvailability } from '../hooks/useGlobeAvailability';
+import { useSceneAvailability } from '../hooks/useSceneAvailability';
 import { Globe } from './Globe';
 import { StaticAtlas } from './StaticAtlas';
 
@@ -8,11 +8,11 @@ interface GlobeStageProps {
 }
 
 export function GlobeStage({ selectedKey, onSelect }: GlobeStageProps) {
-  const { canRenderGlobe } = useGlobeAvailability();
+  const { canRenderScene } = useSceneAvailability();
 
   return (
     <div className="globe-footprint">
-      {canRenderGlobe ? (
+      {canRenderScene ? (
         <Globe selectedKey={selectedKey} onSelect={onSelect} />
       ) : (
         <StaticAtlas selectedKey={selectedKey} />

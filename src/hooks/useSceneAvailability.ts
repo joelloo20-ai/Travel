@@ -14,10 +14,11 @@ function detectWebgl(): boolean {
 }
 
 /**
- * The globe renders only when WebGL works, motion is not reduced, and the
- * viewport is wider than 700px — matching the fallback contract in the spec.
+ * Shared gate for every WebGL scene in the app (globe, landmark pages): render
+ * live 3D only when WebGL works, motion is not reduced, and the viewport is
+ * wider than 700px — otherwise callers should show a static fallback.
  */
-export function useGlobeAvailability(): { canRenderGlobe: boolean; reason: 'reduced-motion' | 'narrow' | 'no-webgl' | null } {
+export function useSceneAvailability(): { canRenderScene: boolean; reason: 'reduced-motion' | 'narrow' | 'no-webgl' | null } {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
     typeof window !== 'undefined'
       ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -42,8 +43,8 @@ export function useGlobeAvailability(): { canRenderGlobe: boolean; reason: 'redu
     };
   }, []);
 
-  if (!hasWebgl) return { canRenderGlobe: false, reason: 'no-webgl' };
-  if (prefersReducedMotion) return { canRenderGlobe: false, reason: 'reduced-motion' };
-  if (isNarrow) return { canRenderGlobe: false, reason: 'narrow' };
-  return { canRenderGlobe: true, reason: null };
+  if (!hasWebgl) return { canRenderScene: false, reason: 'no-webgl' };
+  if (prefersReducedMotion) return { canRenderScene: false, reason: 'reduced-motion' };
+  if (isNarrow) return { canRenderScene: false, reason: 'narrow' };
+  return { canRenderScene: true, reason: null };
 }

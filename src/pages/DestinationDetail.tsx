@@ -2,6 +2,10 @@ import { useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Calendar, MapPin, Plane, Sparkles, UtensilsCrossed } from 'lucide-react';
 import { destinationByKey } from '../data/destinations';
+import { useLiveWeather } from '../hooks/useLiveWeather';
+import { useLocalTime } from '../hooks/useLocalTime';
+import { LandmarkScene } from '../components/landmark/LandmarkScene';
+import { ConditionsHud } from '../components/landmark/ConditionsHud';
 
 const planningCards = [
   {
@@ -29,6 +33,11 @@ const planningCards = [
 export function DestinationDetail() {
   const { key } = useParams<{ key: string }>();
   const destination = key ? destinationByKey(key) : undefined;
+  const { weather, loading: weatherLoading, error: weatherError } = useLiveWeather(
+    destination?.latitude ?? 0,
+    destination?.longitude ?? 0,
+  );
+  const localTime = useLocalTime(destination?.timezone ?? 'UTC');
   const [added, setAdded] = useState(false);
 
   if (!destination) {
@@ -36,12 +45,11 @@ export function DestinationDetail() {
   }
 
   return (
-    <div
-      className="destination-detail"
-      style={{
-        background: `radial-gradient(120% 120% at 20% 0%, ${destination.sky}55, transparent 60%), linear-gradient(180deg, ${destination.deep}, #061b1d 85%)`,
-      }}
-    >
+    <div className="destination-detail">
+      <div className="destination-detail__scene">
+        <LandmarkScene destination={destination} weather={weather} localTime={localTime} loading={weatherLoading} />
+      </div>
+      <div className="destination-detail__scrim" aria-hidden="true" />
       <div className="grain-overlay" aria-hidden="true" />
 
       <Link to="/" className="detail-back">
@@ -55,13 +63,21 @@ export function DestinationDetail() {
         {destination.longitude.toFixed(4)}° {destination.longitude >= 0 ? 'E' : 'W'}
       </div>
 
+      <ConditionsHud
+        weather={weather}
+        weatherLoading={weatherLoading}
+        weatherError={weatherError}
+        localTime={localTime}
+        accent={destination.accent}
+      />
+
       <div className="detail-content">
         <p className="destination-eyebrow" style={{ color: destination.accent }}>
           {destination.cityscapeLabel}
         </p>
         <h1 className="detail-headline">{destination.name}</h1>
         <p className="detail-airport">
-          {destination.airport} · {destination.airportCode}
+          {destination.landmarkName} · {destination.airport} · {destination.airportCode}
         </p>
 
         <div className="detail-actions">

@@ -1,3 +1,16 @@
+export type LandmarkKind =
+  | 'merlion'
+  | 'opera-house'
+  | 'eureka-tower'
+  | 'canton-tower'
+  | 'hk-skyline'
+  | 'taipei-101'
+  | 'tokyo-tower'
+  | 'osaka-castle'
+  | 'seoul-tower'
+  | 'gwangan-bridge'
+  | 'cruise-ship';
+
 export interface Destination {
   key: string;
   country: string;
@@ -13,6 +26,14 @@ export interface Destination {
   sky: string;
   glow: string;
   cityscapeLabel: string;
+  /** IANA timezone used to compute the city's real local time and day/night state. */
+  timezone: string;
+  /** Which procedural 3D landmark to render on the destination detail page. */
+  landmark: LandmarkKind;
+  /** Landmark name shown in the scene HUD. */
+  landmarkName: string;
+  /** Whether the scene should render a water plane (harbour/bay/river) under the landmark. */
+  hasWater: boolean;
 }
 
 export const destinations: Destination[] = [
@@ -31,6 +52,10 @@ export const destinations: Destination[] = [
     sky: '#195451',
     glow: '#f7bd7e',
     cityscapeLabel: 'Home port, drawn in garden light',
+    timezone: 'Asia/Singapore',
+    landmark: 'merlion',
+    landmarkName: 'The Merlion',
+    hasWater: true,
   },
   {
     key: 'sydney',
@@ -47,6 +72,10 @@ export const destinations: Destination[] = [
     sky: '#2c7291',
     glow: '#ffe1a8',
     cityscapeLabel: 'Sails against a harbour dawn',
+    timezone: 'Australia/Sydney',
+    landmark: 'opera-house',
+    landmarkName: 'Sydney Opera House',
+    hasWater: true,
   },
   {
     key: 'melbourne',
@@ -63,6 +92,10 @@ export const destinations: Destination[] = [
     sky: '#5c375d',
     glow: '#f2be90',
     cityscapeLabel: 'Race lights, river lines, late coffee',
+    timezone: 'Australia/Melbourne',
+    landmark: 'eureka-tower',
+    landmarkName: 'Eureka Tower',
+    hasWater: true,
   },
   {
     key: 'guangzhou',
@@ -79,6 +112,10 @@ export const destinations: Destination[] = [
     sky: '#7e3141',
     glow: '#ffc27b',
     cityscapeLabel: 'River heat and a tower of light',
+    timezone: 'Asia/Shanghai',
+    landmark: 'canton-tower',
+    landmarkName: 'Canton Tower',
+    hasWater: true,
   },
   {
     key: 'hong-kong',
@@ -95,6 +132,10 @@ export const destinations: Destination[] = [
     sky: '#354878',
     glow: '#ffcf86',
     cityscapeLabel: 'Harbour neon and vertical nights',
+    timezone: 'Asia/Hong_Kong',
+    landmark: 'hk-skyline',
+    landmarkName: 'Victoria Harbour Skyline',
+    hasWater: true,
   },
   {
     key: 'taipei',
@@ -111,6 +152,10 @@ export const destinations: Destination[] = [
     sky: '#406e72',
     glow: '#ffdda0',
     cityscapeLabel: 'A jade tower over market warmth',
+    timezone: 'Asia/Taipei',
+    landmark: 'taipei-101',
+    landmarkName: 'Taipei 101',
+    hasWater: false,
   },
   {
     key: 'tokyo',
@@ -127,6 +172,10 @@ export const destinations: Destination[] = [
     sky: '#924f5c',
     glow: '#ffd0a0',
     cityscapeLabel: 'Tower light and a midnight horizon',
+    timezone: 'Asia/Tokyo',
+    landmark: 'tokyo-tower',
+    landmarkName: 'Tokyo Tower',
+    hasWater: false,
   },
   {
     key: 'osaka',
@@ -143,6 +192,10 @@ export const destinations: Destination[] = [
     sky: '#9f625b',
     glow: '#ffce99',
     cityscapeLabel: 'Canal glow and kitchen-city energy',
+    timezone: 'Asia/Tokyo',
+    landmark: 'osaka-castle',
+    landmarkName: 'Osaka Castle',
+    hasWater: true,
   },
   {
     key: 'seoul',
@@ -159,6 +212,10 @@ export const destinations: Destination[] = [
     sky: '#485f8a',
     glow: '#ddd1ff',
     cityscapeLabel: 'Mountain silhouettes and city pulse',
+    timezone: 'Asia/Seoul',
+    landmark: 'seoul-tower',
+    landmarkName: 'N Seoul Tower',
+    hasWater: false,
   },
   {
     key: 'busan',
@@ -175,6 +232,10 @@ export const destinations: Destination[] = [
     sky: '#276173',
     glow: '#bcecf0',
     cityscapeLabel: 'Coastlines, bridges and open air',
+    timezone: 'Asia/Seoul',
+    landmark: 'gwangan-bridge',
+    landmarkName: 'Gwangandaegyo Bridge',
+    hasWater: true,
   },
   {
     key: 'disney-cruise',
@@ -191,6 +252,10 @@ export const destinations: Destination[] = [
     sky: '#17617c',
     glow: '#c5f0f3',
     cityscapeLabel: 'A ship of light on an open horizon',
+    timezone: 'Asia/Singapore',
+    landmark: 'cruise-ship',
+    landmarkName: 'Disney Cruise Liner',
+    hasWater: true,
   },
 ];
 

@@ -12,15 +12,18 @@ import {
 import { StaticAtlas } from './StaticAtlas';
 import { GlobeErrorBoundary } from './GlobeErrorBoundary';
 
+
 interface GlobeProps {
   selectedKey: string;
   onSelect: (key: string) => void;
 }
 
+
 function normalizeAngle(angle: number): number {
   const twoPi = Math.PI * 2;
   return ((angle % twoPi) + twoPi) % twoPi;
 }
+
 
 function lerpAngle(current: number, target: number, t: number): number {
   const normalizedCurrent = normalizeAngle(current);
@@ -31,8 +34,9 @@ function lerpAngle(current: number, target: number, t: number): number {
   return current + delta * t;
 }
 
+
 function Earth() {
-  const texture = useLoader(THREE.TextureLoader, '/assets/earth-blue-marble.jpg');
+  const texture = useLoader(THREE.TextureLoader, `${import.meta.env.BASE_URL}assets/earth-blue-marble.jpg`);
 
   useLayoutEffect(() => {
     // three.js textures are mutable engine objects; this is the standard

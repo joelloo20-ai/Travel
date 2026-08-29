@@ -26,7 +26,13 @@ export interface Destination {
     detail: string;
   };
   illustrationKey?: string;
+  timezone: string;
+  landmark: LandmarkKind;
+  landmarkName: string;
+  hasWater: boolean;
 }
+
+export type LandmarkKind = 'merlion' | 'opera-house' | 'eureka-tower' | 'canton-tower' | 'hk-skyline' | 'taipei-101' | 'tokyo-tower' | 'osaka-castle' | 'seoul-tower' | 'gwangan-bridge' | 'cruise-ship';
 
 export const destinations: Destination[] = [
   {
@@ -44,6 +50,7 @@ export const destinations: Destination[] = [
     sky: '#195451',
     glow: '#f7bd7e',
     cityscapeLabel: 'Home port, drawn in garden light',
+    timezone: 'Asia/Singapore', landmark: 'merlion', landmarkName: 'The Merlion', hasWater: true,
     atmosphere: 'rain',
     seasonNote: 'Tropical rain, usually brief — ideal for a late-afternoon reset.',
     recommendations: [
@@ -68,6 +75,7 @@ export const destinations: Destination[] = [
     sky: '#2c7291',
     glow: '#ffe1a8',
     cityscapeLabel: 'Sails against a harbour dawn',
+    timezone: 'Australia/Sydney', landmark: 'opera-house', landmarkName: 'Sydney Opera House', hasWater: true,
     atmosphere: 'sea-spray',
     seasonNote: 'Salt air on the harbour — bring a light layer after sunset.',
     recommendations: [
@@ -92,6 +100,7 @@ export const destinations: Destination[] = [
     sky: '#5c375d',
     glow: '#f2be90',
     cityscapeLabel: 'Race lights, river lines, late coffee',
+    timezone: 'Australia/Melbourne', landmark: 'eureka-tower', landmarkName: 'Eureka Tower', hasWater: true,
     atmosphere: 'rain',
     seasonNote: 'Four seasons in a day — a compact umbrella earns its place.',
     recommendations: [
@@ -116,6 +125,7 @@ export const destinations: Destination[] = [
     sky: '#7e3141',
     glow: '#ffc27b',
     cityscapeLabel: 'River heat and a tower of light',
+    timezone: 'Asia/Shanghai', landmark: 'canton-tower', landmarkName: 'Canton Tower', hasWater: true,
     atmosphere: 'rain',
     seasonNote: 'Warm river weather with passing showers — cool interiors are part of the rhythm.',
     recommendations: [
@@ -140,6 +150,7 @@ export const destinations: Destination[] = [
     sky: '#354878',
     glow: '#ffcf86',
     cityscapeLabel: 'Harbour neon and vertical nights',
+    timezone: 'Asia/Hong_Kong', landmark: 'hk-skyline', landmarkName: 'Victoria Harbour Skyline', hasWater: true,
     atmosphere: 'mist',
     seasonNote: 'Harbour mist and high humidity give the skyline its soft electric glow.',
     recommendations: [
@@ -164,6 +175,7 @@ export const destinations: Destination[] = [
     sky: '#406e72',
     glow: '#ffdda0',
     cityscapeLabel: 'A jade tower over market warmth',
+    timezone: 'Asia/Taipei', landmark: 'taipei-101', landmarkName: 'Taipei 101', hasWater: false,
     atmosphere: 'rain',
     seasonNote: 'Soft rain turns the city glossy; night markets only get better under an awning.',
     recommendations: [
@@ -188,6 +200,7 @@ export const destinations: Destination[] = [
     sky: '#924f5c',
     glow: '#ffd0a0',
     cityscapeLabel: 'Tower light and a midnight horizon',
+    timezone: 'Asia/Tokyo', landmark: 'tokyo-tower', landmarkName: 'Tokyo Tower', hasWater: false,
     atmosphere: 'snow',
     seasonNote: 'A winter hush with sharp blue evenings — layers make long walks better.',
     recommendations: [
@@ -212,6 +225,7 @@ export const destinations: Destination[] = [
     sky: '#9f625b',
     glow: '#ffce99',
     cityscapeLabel: 'Canal glow and kitchen-city energy',
+    timezone: 'Asia/Tokyo', landmark: 'osaka-castle', landmarkName: 'Osaka Castle', hasWater: true,
     atmosphere: 'leaves',
     seasonNote: 'Autumn leaves and steam from the grills make evening walks feel theatrical.',
     recommendations: [
@@ -236,6 +250,7 @@ export const destinations: Destination[] = [
     sky: '#485f8a',
     glow: '#ddd1ff',
     cityscapeLabel: 'Mountain silhouettes and city pulse',
+    timezone: 'Asia/Seoul', landmark: 'seoul-tower', landmarkName: 'N Seoul Tower', hasWater: false,
     atmosphere: 'snow',
     seasonNote: 'Fine snow can turn palace grounds and side streets beautifully quiet.',
     recommendations: [
@@ -260,6 +275,7 @@ export const destinations: Destination[] = [
     sky: '#276173',
     glow: '#bcecf0',
     cityscapeLabel: 'Coastlines, bridges and open air',
+    timezone: 'Asia/Seoul', landmark: 'gwangan-bridge', landmarkName: 'Gwangandaegyo Bridge', hasWater: true,
     atmosphere: 'sea-spray',
     seasonNote: 'A sea breeze follows you everywhere — a light jacket is useful by the shore.',
     recommendations: [
@@ -284,6 +300,7 @@ export const destinations: Destination[] = [
     sky: '#17617c',
     glow: '#c5f0f3',
     cityscapeLabel: 'A ship of light on an open horizon',
+    timezone: 'Asia/Singapore', landmark: 'cruise-ship', landmarkName: 'Disney Cruise Liner', hasWater: true,
     atmosphere: 'sea-spray',
     seasonNote: 'Open-deck breezes arrive quickly after sunset; keep one warm layer nearby.',
     recommendations: [

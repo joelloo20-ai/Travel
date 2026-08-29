@@ -825,6 +825,7 @@ a {
   font-size: 0.68rem;
   letter-spacing: 0.02em;
   margin-bottom: 0.6rem;
+  text-shadow: 0 1px 3px #00000090, 0 2px 12px #00000070;
 }
 
 .destination-headline-wrap {
@@ -1039,6 +1040,28 @@ a {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 1.5rem clamp(1.25rem, 4vw, 4rem) 4rem;
+  background: var(--bg);
+}
+
+.destination-detail__scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+.landmark-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  outline: none;
+  display: block;
+}
+
+.destination-detail__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, #061b1d80 0%, #061b1d15 22%, #061b1d00 40%, #061b1d00 55%, #061b1dcc 88%, var(--bg) 100%);
 }
 .destination-detail--day { color: #19383b; }
 .destination-detail--day .grain-overlay { opacity: 0.12; mix-blend-mode: multiply; }
@@ -1180,6 +1203,7 @@ a {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ivory-subdued);
+  text-shadow: 0 1px 6px #00000080;
   margin-bottom: 2.5rem;
   position: relative;
   z-index: 2;
@@ -1187,6 +1211,103 @@ a {
 
 .detail-back:hover {
   color: var(--ivory);
+}
+
+.landmark-fallback {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 6vh;
+}
+
+.landmark-fallback__ring {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  width: min(46vw, 380px);
+  height: min(46vw, 380px);
+  transform: translateX(-50%);
+  border: 1px dashed;
+  border-radius: 50%;
+  opacity: 0.35;
+}
+
+.landmark-fallback__caption {
+  font-size: 0.64rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ivory-subdued);
+  position: relative;
+  text-align: center;
+  padding: 0 1.5rem;
+}
+
+.conditions-hud {
+  position: fixed;
+  top: 1.5rem;
+  right: clamp(1.25rem, 4vw, 4rem);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.85rem 1.1rem;
+  background: linear-gradient(145deg, #0c302fcc, #041718b8);
+  backdrop-filter: blur(14px);
+  border: 1px solid #ffffff21;
+  border-radius: 1rem;
+  min-width: 11rem;
+  box-shadow: 0 12px 40px #00000033;
+}
+
+.conditions-hud__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--ivory);
+}
+
+.conditions-hud__clock {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.conditions-hud__daynight {
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ivory-subdued);
+}
+
+.conditions-hud__divider {
+  height: 1px;
+  background: #ffffff1c;
+}
+
+.conditions-hud__weather {
+  flex-wrap: wrap;
+}
+
+.conditions-hud__temp {
+  font-weight: 600;
+}
+
+.conditions-hud__condition {
+  color: var(--ivory-subdued);
+}
+
+.conditions-hud__wind {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.64rem;
+  color: var(--ivory-subdued);
+  margin-left: auto;
 }
 
 .detail-coordinates {
@@ -1199,6 +1320,7 @@ a {
   margin-bottom: 3rem;
   position: relative;
   z-index: 2;
+  text-shadow: 0 1px 6px #00000080;
 }
 
 .detail-content {
@@ -1215,12 +1337,14 @@ a {
   letter-spacing: -0.03em;
   margin: 0 0 0.75rem;
   color: var(--ivory);
+  text-shadow: 0 2px 20px #00000060;
 }
 
 .detail-airport {
   font-size: 0.85rem;
   color: var(--ivory-subdued);
   margin: 0 0 2.2rem;
+  text-shadow: 0 1px 6px #00000080;
 }
 
 .detail-actions {
@@ -1320,6 +1444,15 @@ a {
 @media (prefers-reduced-motion: reduce) {
   .atmosphere__particle, .atmosphere__haze, .weather-overlay * { animation: none; }
   .atmosphere__particles { opacity: 0.32; }
+}
+
+@media (max-width: 700px) {
+  .conditions-hud {
+    position: static;
+    margin: 0 0 1.5rem;
+    min-width: 0;
+    width: fit-content;
+  }
 }
 
 .detail-planning-card {

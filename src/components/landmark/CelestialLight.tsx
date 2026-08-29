@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -37,6 +37,22 @@ export function CelestialLight({ sunElevation, dayPhase, goldenPhase, overcast, 
       lightRef.current.intensity = baseIntensity * (1 - overcast * 0.55);
     }
   });
+
+  useEffect(() => {
+    const light = lightRef.current;
+    if (!light) return;
+    const cam = light.shadow.camera;
+    cam.left = -24;
+    cam.right = 24;
+    cam.top = 24;
+    cam.bottom = -24;
+    cam.near = 1;
+    cam.far = 40;
+    cam.updateProjectionMatrix();
+    light.shadow.mapSize.set(2048, 2048);
+    light.shadow.bias = -0.0004;
+    light.shadow.normalBias = 0.02;
+  }, []);
 
   const ambientIntensity = 0.35 + dayPhase * 0.55 + overcast * 0.25;
   const ambientColor = dayPhase > 0.5 ? '#dfe9f2' : '#2c3a5e';

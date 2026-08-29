@@ -12,6 +12,7 @@ import { SkyDome } from './SkyDome';
 import { CelestialLight } from './CelestialLight';
 import { Water } from './Water';
 import { WeatherEffects } from './WeatherFX';
+import { useGroundTexture } from './groundTexture';
 import { GlobeErrorBoundary } from '../GlobeErrorBoundary';
 import { LandmarkStaticFallback } from './LandmarkStaticFallback';
 import { landmarkRegistry } from './Landmarks';
@@ -27,10 +28,11 @@ const CONDITION_OVERCAST_BOOST: Record<string, number> = {
 };
 
 function GroundPlaza({ color }: { color: string }) {
+  const { map } = useGroundTexture(color);
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} receiveShadow>
       <circleGeometry args={[22, 48]} />
-      <meshStandardMaterial color={color} roughness={0.92} metalness={0.03} />
+      <meshStandardMaterial map={map} roughness={0.88} metalness={0.05} />
     </mesh>
   );
 }

@@ -39,14 +39,25 @@ const WaterMaterial = shaderMaterial(
     varying vec2 vUv;
     varying vec3 vWorldPos;
 
+    float hash21(vec2 p) {
+      p = fract(p * vec2(123.34, 456.21));
+      p += dot(p, p + 45.32);
+      return fract(p.x * p.y);
+    }
+
     void main() {
       float d = distance(vUv, vec2(0.5));
       vec3 base = mix(surfaceColor, deepColor, smoothstep(0.0, 0.75, d));
 
-      float sparkleField = sin(vWorldPos.x * 14.0 + time * 1.1) * sin(vWorldPos.z * 12.5 - time * 1.4)
-        + sin(vWorldPos.x * 27.0 - time * 2.1) * sin(vWorldPos.z * 24.0 + time * 1.8) * 0.6;
-      float sparkle = smoothstep(0.97, 1.05, sparkleField);
-      base += sunColor * sparkle * (0.35 + dayPhase * 0.65);
+      // Two independently-drifting, non-axis-aligned noise cells avoid the
+      // grid/moire look of a pure sine product while staying cheap.
+      vec2 driftA = vWorldPos.xz * 11.0 + vec2(time * 0.22, -time * 0.11);
+      vec2 driftB = (vWorldPos.xz * 19.0 + vec2(-time * 0.17, time * 0.26)) * mat2(0.8, 0.6, -0.6, 0.8);
+      float cellA = hash21(floor(driftA));
+      float cellB = hash21(floor(driftB) + 19.7);
+      float twinkle = step(0.975, cellA) * step(0.6, fract(cellB + time * 0.4));
+      float sparkle = twinkle * (0.6 + 0.4 * sin(time * 6.0 + cellA * 40.0));
+      base += sunColor * sparkle * (0.4 + dayPhase * 0.6);
 
       gl_FragColor = vec4(base, opacity);
     }

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
-import { useWindowTextures } from './buildingTextures';
+import { useLatticeAlphaTexture, useWindowTextures } from './buildingTextures';
 
 export interface BuildingSpec {
   x: number;
@@ -145,13 +145,26 @@ export function LatticeTower({
       new THREE.Vector2(waistRadius, waistHeight),
       new THREE.Vector2(topRadius, height),
     ];
-    return new THREE.LatheGeometry(points, 24);
+    return new THREE.LatheGeometry(points, 28);
   }, [baseRadius, waistRadius, waistHeight, topRadius, height]);
+
+  const latticeAlpha = useLatticeAlphaTexture();
 
   return (
     <group>
       <mesh geometry={geometry} castShadow receiveShadow>
-        <meshStandardMaterial color={color} roughness={0.5} metalness={0.55} wireframe={false} />
+        <meshStandardMaterial
+          color={color}
+          roughness={0.5}
+          metalness={0.55}
+          alphaMap={latticeAlpha}
+          alphaTest={0.4}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      {/* Solid inner core so the open lattice doesn't read as a hollow paper cutout from the front. */}
+      <mesh geometry={geometry} scale={0.94} renderOrder={-1}>
+        <meshStandardMaterial color={color} roughness={0.7} metalness={0.3} transparent opacity={0.35} side={THREE.DoubleSide} />
       </mesh>
       {podRadius && podHeight && (
         <mesh position={[0, podHeight, 0]} castShadow>

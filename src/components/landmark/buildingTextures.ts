@@ -32,9 +32,9 @@ function buildFacadeCanvas(cols: number, rows: number, rand: () => number, baseH
     for (let c = 0; c < cols; c++) {
       const x = c * CELL_SIZE;
       const y = r * CELL_SIZE;
-      const lightness = 20 + rand() * 12;
-      const isMullion = rand() < 0.06;
-      ctx.fillStyle = isMullion ? `hsl(${baseHue}, 8%, 10%)` : `hsl(${baseHue + 8}, 16%, ${lightness}%)`;
+      const lightness = 22 + rand() * 5;
+      const isMullion = rand() < 0.03;
+      ctx.fillStyle = isMullion ? `hsl(${baseHue}, 8%, 11%)` : `hsl(${baseHue + 8}, 14%, ${lightness}%)`;
       ctx.fillRect(x + 1, y + 1, CELL_SIZE - 2, CELL_SIZE - 2);
     }
   }
@@ -99,4 +99,56 @@ export function useWindowTextures(widthUnits: number, heightUnits: number, seed:
 
     return { colorMap, emissiveMap };
   }, [widthUnits, heightUnits, seed]);
+}
+
+function buildLatticeAlphaTexture(): THREE.CanvasTexture {
+  const size = 256;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d')!;
+  ctx.clearRect(0, 0, size, size);
+
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = size * 0.09;
+  ctx.lineCap = 'square';
+
+  const bays = 4;
+  const bay = size / bays;
+  for (let i = 0; i < bays; i++) {
+    const x0 = i * bay;
+    ctx.beginPath();
+    ctx.moveTo(x0, 0);
+    ctx.lineTo(x0 + bay, bay);
+    ctx.moveTo(x0 + bay, 0);
+    ctx.lineTo(x0, bay);
+    ctx.stroke();
+  }
+  // Horizontal chords between bays.
+  ctx.lineWidth = size * 0.05;
+  ctx.beginPath();
+  ctx.moveTo(0, 1);
+  ctx.lineTo(size, 1);
+  ctx.moveTo(0, size - 1);
+  ctx.lineTo(size, size - 1);
+  ctx.stroke();
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(10, 26);
+  return texture;
+}
+
+// Built once at module load (not per-render): identical for every lattice
+// tower in the scene, so there is nothing to memoize per-component.
+let latticeAlphaTextureSingleton: THREE.CanvasTexture | undefined;
+
+/**
+ * A repeating diagonal-crosshatch cutout mask so a solid lathe/revolved
+ * profile reads as an open steel lattice/truss tower (Tokyo Tower, Canton
+ * Tower, N Seoul Tower) instead of a painted solid cone.
+ */
+export function useLatticeAlphaTexture(): THREE.CanvasTexture {
+  latticeAlphaTextureSingleton ??= buildLatticeAlphaTexture();
+  return latticeAlphaTextureSingleton;
 }

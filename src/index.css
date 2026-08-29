@@ -1,0 +1,836 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+
+:root {
+  --bg: #061b1d;
+  --ivory: #f7f0e5;
+  --ivory-subdued: #f7f0e5a6;
+  --ivory-faint: #f7f0e566;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ivory);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  min-height: 100svh;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: #efbf8355;
+  color: var(--ivory);
+}
+
+/* --- Ambient layers --- */
+
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.13;
+  mix-blend-mode: soft-light;
+  z-index: 40;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.horizon-glow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 45vh;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(at 53% 98%, #246c677a, #061b1d00 58%);
+}
+
+/* --- App shell --- */
+
+.app-shell {
+  position: relative;
+  min-height: 100svh;
+  height: 100svh;
+  overflow: hidden;
+}
+
+/* --- Nav --- */
+
+.nav-bar-shell {
+  position: relative;
+  z-index: 10;
+  background: linear-gradient(180deg, #061b1dbf 0%, #061b1d70 55%, #061b1d00 100%);
+  pointer-events: none;
+}
+
+.nav-bar-shell > * {
+  pointer-events: auto;
+}
+
+.nav-bar {
+  position: relative;
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.3rem clamp(1.25rem, 4vw, 4rem) 1.9rem;
+  gap: 1rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.brand-orb {
+  position: relative;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #5b8e88, #173937);
+  border: 1px solid #ffffff33;
+  box-shadow: inset 0 1px 2px #ffffff40, inset 0 -6px 10px #00000055;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.brand-orb::after {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: linear-gradient(115deg, transparent 45%, #f3d29a66 50%, transparent 55%);
+}
+
+.brand-orb-letter {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--ivory);
+  position: relative;
+  z-index: 1;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  min-width: 0;
+}
+
+.brand-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: 1.3rem;
+  white-space: nowrap;
+}
+
+.brand-subtitle {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.54rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ivory-subdued);
+}
+
+.nav-route {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ivory-subdued);
+}
+
+.nav-route-line {
+  width: 2.75rem;
+  height: 1px;
+  background: linear-gradient(90deg, #f7f0e555, #efbf83aa);
+  position: relative;
+}
+
+.nav-route-line::after {
+  content: '';
+  position: absolute;
+  right: -2px;
+  top: -1.5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #efbf83cc;
+}
+
+.nav-route-code {
+  color: var(--ivory);
+}
+
+.nav-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid #ffffff2e;
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.42rem 0.85rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ivory-subdued);
+  white-space: nowrap;
+}
+
+.nav-pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #7bd9a3;
+  box-shadow: 0 0 6px 1px #7bd9a3aa;
+}
+
+/* --- Explorer stage --- */
+
+.explorer-stage {
+  position: relative;
+  max-width: 1600px;
+  height: calc(100svh - 84px);
+  min-height: 610px;
+  max-height: 930px;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 4rem);
+}
+
+.globe-footprint {
+  position: absolute;
+  inset: -14% 11% -15% 20%;
+  z-index: 1;
+}
+
+.globe-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  outline: none;
+}
+
+.scan-line {
+  position: absolute;
+  left: 23%;
+  width: 66%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #f7f0e52e, transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.scan-line--one {
+  top: 22%;
+}
+
+.scan-line--two {
+  top: 65%;
+}
+
+/* --- Instruction row --- */
+
+.instruction-row {
+  position: absolute;
+  left: clamp(1.25rem, 4vw, 4rem);
+  bottom: 34%;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--ivory-subdued);
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  max-width: 15rem;
+}
+
+.instruction-row svg {
+  color: #efbf83;
+  flex-shrink: 0;
+}
+
+/* --- Pin callout --- */
+
+.pin-callout {
+  position: absolute;
+  top: 24%;
+  left: clamp(1.25rem, 4vw, 4rem);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  pointer-events: none;
+}
+
+.pin-callout-ring {
+  position: absolute;
+  left: -1.4rem;
+  top: 50%;
+  width: 5rem;
+  height: 5rem;
+  transform: translateY(-50%);
+  border: 1px dashed #f7f0e52a;
+  border-radius: 50%;
+}
+
+.pin-callout-icon {
+  color: #efbf83;
+  flex-shrink: 0;
+}
+
+.pin-callout-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.pin-callout-city {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  color: var(--ivory);
+}
+
+.pin-callout-label {
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ivory-subdued);
+}
+
+/* --- Journey pills --- */
+
+.journey-panel {
+  position: absolute;
+  left: clamp(1.25rem, 4vw, 4rem);
+  bottom: 5%;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-width: min(90vw, 20rem);
+}
+
+.journey-eyebrow {
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ivory-subdued);
+}
+
+.journey-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.journey-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: #051a1b99;
+  border: 1px solid #ffffff1c;
+  border-radius: 999px;
+  padding: 0.46rem 0.6rem;
+  color: var(--ivory-subdued);
+  backdrop-filter: blur(6px);
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  text-align: left;
+}
+
+.journey-pill svg {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.journey-pill-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.journey-pill-label {
+  font-size: 0.74rem;
+  font-weight: 500;
+}
+
+.journey-pill-dates {
+  font-size: 0.6rem;
+  opacity: 0.75;
+}
+
+.journey-pill.is-selected {
+  color: var(--ivory);
+  border-color: #efbf8394;
+}
+
+.journey-pill:hover {
+  color: var(--ivory);
+}
+
+/* --- Destination card --- */
+
+.destination-card {
+  position: absolute;
+  right: clamp(1.25rem, 4vw, 4rem);
+  bottom: 12%;
+  width: min(22rem, calc(100% - 2.5rem));
+  z-index: 9;
+  padding: 1.4rem;
+  background: linear-gradient(145deg, #0c302fe6, #041718d1);
+  backdrop-filter: blur(16px);
+  border: 1px solid #ffffff21;
+  border-radius: 24.8px;
+  box-shadow: 0 20px 60px #00000040;
+}
+
+.destination-eyebrow {
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.6rem;
+}
+
+.destination-headline-wrap {
+  position: relative;
+  height: clamp(2.52rem, 6.48vw, 4.104rem);
+  margin-bottom: 1rem;
+}
+
+.destination-headline {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: max-content;
+  max-width: none;
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: clamp(3.5rem, 9vw, 5.7rem);
+  line-height: 0.72;
+  letter-spacing: -0.04em;
+  color: var(--ivory);
+  margin: 0;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.destination-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.85rem;
+  margin-bottom: 0.4rem;
+  border-top: 1px solid #ffffff1f;
+  position: relative;
+  font-size: 0.72rem;
+  color: var(--ivory-subdued);
+}
+
+.destination-meta::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 30%;
+  right: 30%;
+  height: 1px;
+  background-image: repeating-linear-gradient(90deg, #efbf8399 0 4px, transparent 4px 8px);
+}
+
+.destination-country-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.1rem;
+  font-size: 0.7rem;
+  color: var(--ivory-subdued);
+}
+
+.destination-country-row strong {
+  color: var(--ivory);
+  font-weight: 500;
+}
+
+.destination-cta {
+  width: 100%;
+  border: none;
+  border-radius: 0.9rem;
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #061b1d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: transform 0.12s ease;
+}
+
+.destination-cta:active {
+  transform: scale(0.97);
+}
+
+/* --- City chips --- */
+
+.city-chip-row {
+  position: absolute;
+  left: 50%;
+  bottom: 2.4%;
+  transform: translateX(-50%);
+  z-index: 7;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.85rem;
+  max-width: min(90vw, 58rem);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  padding: 0.2rem 0.5rem;
+}
+
+.city-chip-row::-webkit-scrollbar {
+  display: none;
+}
+
+.city-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: none;
+  padding: 0.3rem 0.15rem;
+  font-size: 0.66rem;
+  color: var(--ivory-faint);
+  transition: color 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.city-chip:hover {
+  color: var(--ivory-subdued);
+}
+
+.city-chip.is-active {
+  color: var(--ivory);
+}
+
+.city-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.city-chip-code {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* --- Beacon labels (rendered via drei Html, portal outside React tree styling) --- */
+
+.beacon-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.4rem 0.7rem;
+  background: #041718d9;
+  border: 1px solid #ffffff26;
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateY(-100%);
+}
+
+.beacon-label__code {
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ivory-subdued);
+}
+
+.beacon-label__city {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  color: var(--ivory);
+  line-height: 1.1;
+}
+
+/* --- Static atlas fallback --- */
+
+.static-atlas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.static-atlas__orb {
+  width: min(60vw, 620px);
+  height: min(60vw, 620px);
+  filter: drop-shadow(0 20px 60px #00000055);
+}
+
+.static-atlas__grid {
+  width: 100%;
+  height: 100%;
+}
+
+.static-atlas__caption {
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ivory-subdued);
+  white-space: nowrap;
+}
+
+/* --- Destination detail page --- */
+
+.destination-detail {
+  position: relative;
+  min-height: 100svh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem clamp(1.25rem, 4vw, 4rem) 4rem;
+}
+
+.detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ivory-subdued);
+  margin-bottom: 2.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.detail-back:hover {
+  color: var(--ivory);
+}
+
+.detail-coordinates {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  color: var(--ivory-subdued);
+  margin-bottom: 3rem;
+  position: relative;
+  z-index: 2;
+}
+
+.detail-content {
+  position: relative;
+  z-index: 2;
+  max-width: 46rem;
+}
+
+.detail-headline {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: clamp(3.2rem, 9vw, 6.5rem);
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  margin: 0 0 0.75rem;
+  color: var(--ivory);
+}
+
+.detail-airport {
+  font-size: 0.85rem;
+  color: var(--ivory-subdued);
+  margin: 0 0 2.2rem;
+}
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-bottom: 3.5rem;
+}
+
+.detail-cta {
+  width: auto;
+  padding: 0.85rem 1.6rem;
+}
+
+.detail-outline-action {
+  background: transparent;
+  border: 1px solid #ffffff33;
+  border-radius: 0.9rem;
+  padding: 0.85rem 1.6rem;
+  font-size: 0.85rem;
+  color: var(--ivory);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.detail-outline-action:hover {
+  border-color: #ffffff66;
+  background: #ffffff0d;
+}
+
+.detail-planning-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  max-width: 40rem;
+}
+
+@media (max-width: 620px) {
+  .detail-planning-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-planning-card {
+  background: linear-gradient(145deg, #0c302fe6, #041718d1);
+  border: 1px solid #ffffff1c;
+  border-radius: 1.1rem;
+  padding: 1.2rem;
+  backdrop-filter: blur(12px);
+}
+
+.detail-planning-icon {
+  color: #efbf83;
+  margin-bottom: 0.6rem;
+}
+
+.detail-planning-card h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 0.4rem;
+}
+
+.detail-planning-card p {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ivory-subdued);
+  margin: 0;
+}
+
+/* --- Responsive --- */
+
+@media (max-width: 900px) {
+  .nav-route {
+    display: none;
+  }
+
+  .explorer-stage {
+    min-height: 690px;
+  }
+
+  .globe-footprint {
+    inset: -8% -17% 9%;
+  }
+
+  .instruction-row {
+    bottom: 10%;
+  }
+
+  .pin-callout {
+    top: 18%;
+  }
+
+  .journey-panel {
+    top: 27%;
+    bottom: auto;
+  }
+
+  .journey-pills {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .destination-card {
+    bottom: 4%;
+    padding: 1.1rem;
+  }
+
+  .destination-country-row {
+    margin-bottom: 0.8rem;
+  }
+
+  .city-chip-row {
+    bottom: 1.2%;
+  }
+}
+
+@media (max-width: 560px) {
+  .globe-footprint {
+    inset: 0 -50% 4%;
+  }
+
+  .explorer-stage {
+    min-height: 700px;
+  }
+
+  .pin-callout {
+    top: 15%;
+  }
+
+  .journey-panel {
+    top: 24%;
+    max-width: min(90vw, 15rem);
+  }
+
+  .journey-pill-label {
+    font-size: 0.58rem;
+  }
+
+  .journey-pill-dates {
+    font-size: 0.58rem;
+  }
+
+  .destination-headline-wrap {
+    height: clamp(2.1rem, 12vw, 2.9rem);
+  }
+
+  .destination-meta,
+  .destination-country-row {
+    font-size: 0.64rem;
+  }
+}

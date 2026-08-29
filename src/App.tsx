@@ -1,19 +1,25 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { HashRouter, Route, Routes } from 'react-router-dom';
 import { GlobeExplorer } from './pages/GlobeExplorer';
 import { DestinationDetail } from './pages/DestinationDetail';
 
 
+
+
 function App() {
   return (
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<GlobeExplorer />} />
         <Route path="/destination/:key" element={<DestinationDetail />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
 
+
+
 export default App;
+
+
 

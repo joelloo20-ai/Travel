@@ -14,17 +14,15 @@ function detectWebgl(): boolean {
 }
 
 /**
- * The globe renders only when WebGL works, motion is not reduced, and the
- * viewport is wider than 700px — matching the fallback contract in the spec.
+ * The globe renders whenever WebGL is available. Compact screens use the same
+ * scene with the Canvas pixel ratio capped in the renderer instead of losing
+ * the exploration experience altogether.
  */
-export function useGlobeAvailability(): { canRenderGlobe: boolean; reason: 'reduced-motion' | 'narrow' | 'no-webgl' | null } {
+export function useGlobeAvailability(): { canRenderGlobe: boolean; reason: 'reduced-motion' | 'no-webgl' | null } {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
     typeof window !== 'undefined'
       ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
       : false,
-  );
-  const [isNarrow, setIsNarrow] = useState(() =>
-    typeof window !== 'undefined' ? window.innerWidth <= 700 : false,
   );
   const [hasWebgl] = useState(detectWebgl);
 
@@ -33,17 +31,12 @@ export function useGlobeAvailability(): { canRenderGlobe: boolean; reason: 'redu
     const handleMotionChange = () => setPrefersReducedMotion(motionQuery.matches);
     motionQuery.addEventListener('change', handleMotionChange);
 
-    const handleResize = () => setIsNarrow(window.innerWidth <= 700);
-    window.addEventListener('resize', handleResize);
-
     return () => {
       motionQuery.removeEventListener('change', handleMotionChange);
-      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
   if (!hasWebgl) return { canRenderGlobe: false, reason: 'no-webgl' };
   if (prefersReducedMotion) return { canRenderGlobe: false, reason: 'reduced-motion' };
-  if (isNarrow) return { canRenderGlobe: false, reason: 'narrow' };
   return { canRenderGlobe: true, reason: null };
 }

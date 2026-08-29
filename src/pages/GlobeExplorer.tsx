@@ -1,20 +1,45 @@
-import { useCallback, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUpRight, MapPin, Move, Plane, Ship } from 'lucide-react';
-import { GlobeStage } from '../components/GlobeStage';
+import { ArrowUpRight, MapPin, Move, Plane, Plus, Ship } from 'lucide-react';
+import { StaticAtlas } from '../components/StaticAtlas';
 import {
   DEFAULT_DESTINATION_KEY,
   destinationByKey,
   destinations,
-  journeys,
 } from '../data/destinations';
+import { getTrips } from '../lib/tripStore';
+import type { Trip } from '../types/trips';
 
-const journeyIcon = (destinationKey: string) => (destinationKey === 'disney-cruise' ? Ship : Plane);
+const GlobeStage = lazy(() => import('../components/GlobeStage').then((module) => ({ default: module.GlobeStage })));
+
+const journeyIcon = (trip: Trip) => (trip.destination.toLowerCase().includes('cruise') ? Ship : Plane);
+const journeyDateFormatter = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short' });
+
+function formatJourneyDates(startDate: string, endDate: string): string {
+  const start = new Date(`${startDate}T12:00:00`);
+  const end = new Date(`${endDate}T12:00:00`);
+  return startDate === endDate ? journeyDateFormatter.format(start) : `${journeyDateFormatter.format(start)} – ${journeyDateFormatter.format(end)}`;
+}
 
 export function GlobeExplorer() {
   const navigate = useNavigate();
   const [selectedKey, setSelectedKey] = useState(DEFAULT_DESTINATION_KEY);
+  const [savedTrips, setSavedTrips] = useState<Trip[]>(() => getTrips());
   const selected = destinationByKey(selectedKey) ?? destinationByKey(DEFAULT_DESTINATION_KEY)!;
+  const orderedTrips = useMemo(
+    () => [...savedTrips].sort((first, second) => first.startDate.localeCompare(second.startDate)),
+    [savedTrips],
+  );
+
+  useEffect(() => {
+    const refreshTrips = () => setSavedTrips(getTrips());
+    window.addEventListener('focus', refreshTrips);
+    window.addEventListener('storage', refreshTrips);
+    return () => {
+      window.removeEventListener('focus', refreshTrips);
+      window.removeEventListener('storage', refreshTrips);
+    };
+  }, []);
 
   const handleSelect = useCallback((key: string) => {
     setSelectedKey(key);
@@ -58,7 +83,9 @@ export function GlobeExplorer() {
         <span className="scan-line scan-line--one" aria-hidden="true" />
         <span className="scan-line scan-line--two" aria-hidden="true" />
 
-        <GlobeStage selectedKey={selectedKey} onSelect={handleSelect} />
+        <Suspense fallback={<div className="globe-footprint"><StaticAtlas loading selectedKey={selectedKey} /></div>}>
+          <GlobeStage selectedKey={selectedKey} onSelect={handleSelect} />
+        </Suspense>
 
         <div className="instruction-row">
           <Move size={16} aria-hidden="true" />
@@ -75,26 +102,34 @@ export function GlobeExplorer() {
         </div>
 
         <div className="journey-panel">
-          <span className="journey-eyebrow">Your Dated Journeys</span>
+          <div className="journey-panel__heading">
+            <span className="journey-eyebrow">Your Dated Journeys</span>
+            {orderedTrips.length > 0 && <span className="journey-count">{orderedTrips.length}</span>}
+          </div>
           <div className="journey-pills">
-            {journeys.map((journey) => {
-              const Icon = journeyIcon(journey.destinationKey);
-              const isSelected = journey.destinationKey === selectedKey;
+            {orderedTrips.length > 0 ? orderedTrips.map((trip) => {
+              const Icon = journeyIcon(trip);
               return (
                 <button
-                  key={journey.destinationKey}
+                  key={trip.id}
                   type="button"
-                  className={`journey-pill${isSelected ? ' is-selected' : ''}`}
-                  onClick={() => handleSelect(journey.destinationKey)}
+                  className="journey-pill"
+                  onClick={() => navigate(`/atlas?journey=${encodeURIComponent(trip.id)}`)}
+                  aria-label={`Open itinerary for ${trip.title}`}
                 >
                   <Icon size={15} aria-hidden="true" />
                   <span className="journey-pill-text">
-                    <span className="journey-pill-label">{journey.label}</span>
-                    <span className="journey-pill-dates">{journey.dates}</span>
+                    <span className="journey-pill-label">{trip.title}</span>
+                    <span className="journey-pill-dates">{formatJourneyDates(trip.startDate, trip.endDate)}</span>
                   </span>
                 </button>
               );
-            })}
+            }) : (
+              <button type="button" className="journey-empty" onClick={() => navigate('/atlas')}>
+                <Plus size={15} aria-hidden="true" />
+                <span>Plan your first journey</span>
+              </button>
+            )}
           </div>
         </div>
 

@@ -45,7 +45,7 @@ function Earth() {
   return (
     <>
       <mesh>
-        <sphereGeometry args={[1.48, 96, 96]} />
+        <sphereGeometry args={[1.48, 72, 72]} />
         <meshStandardMaterial
           map={texture}
           color="#ffffff"
@@ -57,7 +57,7 @@ function Earth() {
         />
       </mesh>
       <mesh scale={1.012}>
-        <sphereGeometry args={[1.48, 64, 64]} />
+        <sphereGeometry args={[1.48, 48, 48]} />
         <meshPhongMaterial
           color="#b5eaff"
           opacity={0.12}
@@ -67,7 +67,7 @@ function Earth() {
         />
       </mesh>
       <mesh scale={1.12}>
-        <sphereGeometry args={[1.48, 64, 64]} />
+        <sphereGeometry args={[1.48, 48, 48]} />
         <meshBasicMaterial
           color="#5aabc6"
           opacity={0.16}
@@ -167,7 +167,7 @@ function Scene({ selectedKey, onSelect }: SceneProps) {
     if (!group) return;
     group.rotation.y = lerpAngle(group.rotation.y, targetRotationRef.current, Math.min(delta * 2.2, 1));
     if (!isDraggingRef.current) {
-      group.rotation.y += delta * 0.035;
+      group.rotation.y += delta * 0.12;
     }
   });
 
@@ -182,7 +182,7 @@ function Scene({ selectedKey, onSelect }: SceneProps) {
       <ambientLight intensity={1.05} />
       <directionalLight position={[4, 2.5, 4]} intensity={2.3} color="#fff3d9" />
       <pointLight position={[-4, -1, 3]} intensity={1.15} color="#4c9ab4" />
-      <Stars radius={16} depth={8} count={1100} factor={2.4} saturation={0.2} fade speed={0.4} />
+      <Stars radius={16} depth={8} count={700} factor={2.2} saturation={0.2} fade speed={0.3} />
       <group ref={groupRef} rotation={[0, initialRotationY, 0]}>
         <Suspense fallback={null}>
           <Earth />
@@ -223,8 +223,8 @@ export function Globe({ selectedKey, onSelect }: GlobeProps) {
       <Suspense fallback={<StaticAtlas loading selectedKey={selectedKey} />}>
         <Canvas
           className="globe-canvas"
-          dpr={[1, 1.75]}
-          gl={{ antialias: true, alpha: true }}
+          dpr={[1, Math.min(1.5, window.devicePixelRatio || 1)]}
+          gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
           camera={{ position: [0, 0.15, 4.7], fov: 42 }}
         >
           <Scene selectedKey={selectedKey} onSelect={onSelect} />

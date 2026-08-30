@@ -6,7 +6,9 @@ interface WindowTextureSet {
   emissiveMap: THREE.CanvasTexture;
 }
 
-const CELL_SIZE = 18;
+// Keep the generated facade fine-grained even on the narrow towers used by the
+// diorama. Large emissive squares read as toy blocks from the hero camera.
+const CELL_SIZE = 12;
 
 function mulberry32(seed: number) {
   let a = seed;
@@ -25,24 +27,24 @@ function buildFacadeCanvas(cols: number, rows: number, rand: () => number, baseH
   canvas.height = rows * CELL_SIZE;
   const ctx = canvas.getContext('2d')!;
 
-  ctx.fillStyle = `hsl(${baseHue}, 14%, 15%)`;
+  ctx.fillStyle = `hsl(${baseHue}, 17%, 13%)`;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const x = c * CELL_SIZE;
       const y = r * CELL_SIZE;
-      const lightness = 22 + rand() * 5;
-      const isMullion = rand() < 0.03;
-      ctx.fillStyle = isMullion ? `hsl(${baseHue}, 8%, 11%)` : `hsl(${baseHue + 8}, 14%, ${lightness}%)`;
+      const lightness = 18 + rand() * 5;
+      const isMullion = rand() < 0.07;
+      ctx.fillStyle = isMullion ? `hsl(${baseHue}, 10%, 8%)` : `hsl(${baseHue + 8}, 18%, ${lightness}%)`;
       ctx.fillRect(x + 1, y + 1, CELL_SIZE - 2, CELL_SIZE - 2);
     }
   }
 
   // Faint horizontal floor bands for structure.
-  ctx.fillStyle = `hsla(${baseHue}, 10%, 6%, 0.35)`;
-  for (let r = 0; r < rows; r += 3) {
-    ctx.fillRect(0, r * CELL_SIZE, canvas.width, 1.5);
+  ctx.fillStyle = `hsla(${baseHue}, 12%, 5%, 0.5)`;
+  for (let r = 0; r < rows; r += 2) {
+    ctx.fillRect(0, r * CELL_SIZE, canvas.width, 1);
   }
 
   return canvas;
@@ -62,9 +64,9 @@ function buildEmissiveCanvas(cols: number, rows: number, rand: () => number, lit
       const x = c * CELL_SIZE;
       const y = r * CELL_SIZE;
       const warmth = rand();
-      const color = warmth > 0.72 ? '#ffe3b0' : warmth > 0.4 ? '#fff3d6' : '#cfe6ff';
+      const color = warmth > 0.62 ? '#f5c27d' : warmth > 0.22 ? '#e6c39b' : '#92b1ba';
       ctx.fillStyle = color;
-      ctx.fillRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+      ctx.fillRect(x + 3, y + 3, CELL_SIZE - 6, CELL_SIZE - 6);
     }
   }
 
@@ -79,10 +81,10 @@ function buildEmissiveCanvas(cols: number, rows: number, rand: () => number, lit
 export function useWindowTextures(widthUnits: number, heightUnits: number, seed: number): WindowTextureSet {
   return useMemo(() => {
     const rand = mulberry32(Math.floor(seed * 100000) + 1);
-    const cols = Math.max(3, Math.round(widthUnits * 9));
-    const rows = Math.max(4, Math.round(heightUnits * 7));
+    const cols = Math.max(5, Math.round(widthUnits * 15));
+    const rows = Math.max(8, Math.round(heightUnits * 13));
     const baseHue = 195 + rand() * 40;
-    const litRatio = 0.22 + rand() * 0.28;
+    const litRatio = 0.07 + rand() * 0.11;
 
     const colorCanvas = buildFacadeCanvas(cols, rows, mulberry32(Math.floor(seed * 100000) + 1), baseHue);
     const emissiveCanvas = buildEmissiveCanvas(cols, rows, mulberry32(Math.floor(seed * 100000) + 7), litRatio);

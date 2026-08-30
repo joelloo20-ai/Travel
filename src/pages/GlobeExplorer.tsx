@@ -13,12 +13,23 @@ import type { Trip } from '../types/trips';
 const GlobeStage = lazy(() => import('../components/GlobeStage').then((module) => ({ default: module.GlobeStage })));
 
 const journeyIcon = (trip: Trip) => (trip.destination.toLowerCase().includes('cruise') ? Ship : Plane);
-const journeyDateFormatter = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short' });
+const journeyDateFormatter = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
 function formatJourneyDates(startDate: string, endDate: string): string {
+  if (!startDate && !endDate) return 'Dates not recorded';
   const start = new Date(`${startDate}T12:00:00`);
   const end = new Date(`${endDate}T12:00:00`);
   return startDate === endDate ? journeyDateFormatter.format(start) : `${journeyDateFormatter.format(start)} – ${journeyDateFormatter.format(end)}`;
+}
+
+function estimatedFlightDuration(destinationLatitude: number, destinationLongitude: number): string {
+  const radians = (degrees: number) => degrees * Math.PI / 180;
+  const distance = 6371 * Math.acos(
+    Math.sin(radians(1.3644)) * Math.sin(radians(destinationLatitude))
+    + Math.cos(radians(1.3644)) * Math.cos(radians(destinationLatitude)) * Math.cos(radians(destinationLongitude - 103.9915)),
+  );
+  const minutes = Math.max(70, Math.round((distance / 850 + 0.45) * 60 / 5) * 5);
+  return `~${Math.floor(minutes / 60)}h ${minutes % 60}m`;
 }
 
 export function GlobeExplorer() {
@@ -26,6 +37,18 @@ export function GlobeExplorer() {
   const [selectedKey, setSelectedKey] = useState(DEFAULT_DESTINATION_KEY);
   const [savedTrips, setSavedTrips] = useState<Trip[]>(() => getTrips());
   const selected = destinationByKey(selectedKey) ?? destinationByKey(DEFAULT_DESTINATION_KEY)!;
+  const flightDuration = selected.airportCode === 'SIN' ? '' : estimatedFlightDuration(selected.latitude, selected.longitude);
+  const cityTrips = useMemo(() => {
+    const city = selected.name.toLowerCase();
+    return savedTrips.filter((trip) => `${trip.destination} ${trip.title}`.toLowerCase().includes(city));
+  }, [savedTrips, selected.name]);
+  const { nextTrip, pastTripCount } = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const datedTrips = cityTrips.filter((trip) => /^\d{4}-\d{2}-\d{2}$/.test(trip.startDate));
+    const upcoming = datedTrips.filter((trip) => new Date(`${trip.startDate}T12:00:00`) >= today).sort((a, b) => a.startDate.localeCompare(b.startDate));
+    return { nextTrip: upcoming[0], pastTripCount: datedTrips.length - upcoming.length };
+  }, [cityTrips]);
   const orderedTrips = useMemo(
     () => [...savedTrips].sort((first, second) => first.startDate.localeCompare(second.startDate)),
     [savedTrips],
@@ -57,12 +80,9 @@ export function GlobeExplorer() {
       <div className="nav-bar-shell">
         <nav className="nav-bar">
           <div className="brand">
-            <div className="brand-orb">
-              <span className="brand-orb-letter">T</span>
-            </div>
             <div className="brand-text">
-              <span className="brand-title">The Travel Quest</span>
-              <span className="brand-subtitle">Private World Atlas</span>
+              <span className="brand-title">JayBee Travels</span>
+              <span className="brand-subtitle">A private world atlas</span>
             </div>
           </div>
 
@@ -92,19 +112,22 @@ export function GlobeExplorer() {
           <span>Drag to turn · hover airport beacons · select a city</span>
         </div>
 
-        <div className="pin-callout">
+        <button type="button" className="pin-callout" onClick={() => navigate('/destination/singapore')} aria-label="Explore Singapore">
           <span className="pin-callout-ring" aria-hidden="true" />
           <MapPin size={16} className="pin-callout-icon" aria-hidden="true" />
           <div className="pin-callout-text">
             <span className="pin-callout-city">Singapore</span>
             <span className="pin-callout-label">Home Port</span>
           </div>
-        </div>
+        </button>
 
         <div className="journey-panel">
           <div className="journey-panel__heading">
             <span className="journey-eyebrow">Your Dated Journeys</span>
-            {orderedTrips.length > 0 && <span className="journey-count">{orderedTrips.length}</span>}
+            <div className="journey-panel__actions">
+              {orderedTrips.length > 0 && <span className="journey-count">{orderedTrips.length}</span>}
+              <button type="button" className="journey-add" onClick={() => navigate('/atlas?new=1&from=globe')}><Plus size={13} /> Plan trip</button>
+            </div>
           </div>
           <div className="journey-pills">
             {orderedTrips.length > 0 ? orderedTrips.map((trip) => {
@@ -114,7 +137,7 @@ export function GlobeExplorer() {
                   key={trip.id}
                   type="button"
                   className="journey-pill"
-                  onClick={() => navigate(`/atlas?journey=${encodeURIComponent(trip.id)}`)}
+                  onClick={() => navigate(`/atlas?journey=${encodeURIComponent(trip.id)}&from=globe`)}
                   aria-label={`Open itinerary for ${trip.title}`}
                 >
                   <Icon size={15} aria-hidden="true" />
@@ -125,18 +148,17 @@ export function GlobeExplorer() {
                 </button>
               );
             }) : (
-              <button type="button" className="journey-empty" onClick={() => navigate('/atlas')}>
+              <button type="button" className="journey-empty" onClick={() => navigate('/atlas?new=1&from=globe')}>
                 <Plus size={15} aria-hidden="true" />
                 <span>Plan your first journey</span>
               </button>
             )}
           </div>
+          {orderedTrips.length > 0 && <button type="button" className="journey-see-more" onClick={() => navigate('/atlas')}>See all itineraries <ArrowUpRight size={13} /></button>}
         </div>
 
         <div className="destination-card">
-          <p className="destination-eyebrow" style={{ color: selected.accent }}>
-            {selected.cityscapeLabel}
-          </p>
+          <p className="destination-visits">{nextTrip ? <><strong>Upcoming</strong> · {formatJourneyDates(nextTrip.startDate, nextTrip.endDate)}</> : <><strong>{pastTripCount}</strong> {pastTripCount === 1 ? 'past trip together' : 'past trips together'}</>}</p>
           <div className="destination-headline-wrap">
             <h1 className="destination-headline">{selected.name}</h1>
           </div>
@@ -144,6 +166,7 @@ export function GlobeExplorer() {
             <span>{selected.airport}</span>
             <span>{selected.airportCode}</span>
           </div>
+          {flightDuration && <div className="destination-flight-duration"><Plane size={14} aria-hidden="true" /><span>From Singapore</span><strong>{flightDuration}</strong></div>}
           <div className="destination-country-row">
             <strong>{selected.countryName}</strong>
             <span>{selected.primary ? 'Primary city point' : 'Second city point'}</span>

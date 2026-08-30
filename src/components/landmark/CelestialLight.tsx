@@ -33,7 +33,7 @@ export function CelestialLight({ sunElevation, dayPhase, goldenPhase, overcast, 
       mixed.copy(nightColor).lerp(duskColor, goldenPhase).lerp(dayColor, Math.max(0, dayPhase - goldenPhase * 0.3));
       lightRef.current.color.copy(mixed);
 
-      const baseIntensity = 0.35 + dayPhase * 2.4 + goldenPhase * 0.5;
+      const baseIntensity = 0.28 + dayPhase * 1.28 + goldenPhase * 0.35;
       lightRef.current.intensity = baseIntensity * (1 - overcast * 0.55);
     }
   });
@@ -54,7 +54,7 @@ export function CelestialLight({ sunElevation, dayPhase, goldenPhase, overcast, 
     light.shadow.normalBias = 0.02;
   }, []);
 
-  const ambientIntensity = 0.35 + dayPhase * 0.55 + overcast * 0.25;
+  const ambientIntensity = 0.24 + dayPhase * 0.36 + overcast * 0.18;
   const ambientColor = dayPhase > 0.5 ? '#dfe9f2' : '#2c3a5e';
   const fillIntensity = 0.5 + (1 - dayPhase) * 0.5;
 

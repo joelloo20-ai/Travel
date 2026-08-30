@@ -13,7 +13,8 @@ function App() {
     <Router>
       <Suspense fallback={<div className="route-loader" aria-label="Loading page" />}>
         <Routes>
-          <Route path="/" element={<GlobeExplorer />} />
+        <Route path="/" element={<GlobeExplorer />} />
+        <Route path="/globe" element={<GlobeExplorer />} />
           <Route path="/destination/:key" element={<DestinationDetail />} />
           <Route path="/atlas" element={<Atlas />} />
         </Routes>

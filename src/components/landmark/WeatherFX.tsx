@@ -77,12 +77,57 @@ const SnowMaterial = shaderMaterial(
   `,
 );
 
-extend({ RainMaterial, SnowMaterial });
+const CloudRibbonMaterial = shaderMaterial(
+  { time: 0, opacity: 0.1, tint: new THREE.Color('#a9b8bd') },
+  /* glsl */ `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  /* glsl */ `
+    uniform float time;
+    uniform float opacity;
+    uniform vec3 tint;
+    varying vec2 vUv;
+
+    float hash(vec2 p) {
+      return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+    }
+    float noise(vec2 p) {
+      vec2 i = floor(p);
+      vec2 f = fract(p);
+      f = f * f * (3.0 - 2.0 * f);
+      return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+    }
+    float fbm(vec2 p) {
+      float value = 0.0;
+      float amplitude = 0.5;
+      for (int i = 0; i < 3; i++) {
+        value += amplitude * noise(p);
+        p = p * 2.02 + 8.4;
+        amplitude *= 0.5;
+      }
+      return value;
+    }
+    void main() {
+      float edge = smoothstep(0.0, 0.13, vUv.x) * smoothstep(0.0, 0.13, 1.0 - vUv.x);
+      float band = smoothstep(0.03, 0.34, vUv.y) * smoothstep(0.04, 0.76, 1.0 - vUv.y);
+      float drift = fbm(vec2(vUv.x * 3.2 + time * 0.012, vUv.y * 4.5));
+      float wisps = smoothstep(0.39, 0.68, drift);
+      gl_FragColor = vec4(tint, edge * band * wisps * opacity);
+    }
+  `,
+);
+
+extend({ RainMaterial, SnowMaterial, CloudRibbonMaterial });
 
 declare module '@react-three/fiber' {
   interface ThreeElements {
     rainMaterial: ThreeElement<typeof RainMaterial>;
     snowMaterial: ThreeElement<typeof SnowMaterial>;
+    cloudRibbonMaterial: ThreeElement<typeof CloudRibbonMaterial>;
   }
 }
 
@@ -214,27 +259,35 @@ interface CloudPuffsProps {
   tint: string;
 }
 
-/** A handful of soft, low-poly cloud clusters drifting slowly overhead. */
+/**
+ * Low, flattened cloud banks that sit behind the landmark. Keeping them quiet
+ * avoids the giant translucent-orb look that breaks a composed skyline shot.
+ */
 export function CloudPuffs({ coverage, windX, windZ, tint }: CloudPuffsProps) {
   const groupRef = useRef<THREE.Group>(null);
+  const cloudColor = useMemo(() => new THREE.Color(tint).lerp(new THREE.Color('#a9b8bd'), 0.72), [tint]);
+  const materialsRef = useRef<InstanceType<typeof CloudRibbonMaterial>[]>([]);
   const puffs = useMemo(
     () =>
-      Array.from({ length: 7 }, (_, i) => ({
-        x: (Math.random() * 2 - 1) * 16,
-        z: (Math.random() * 2 - 1) * 16,
-        y: 6 + Math.random() * 4,
-        scale: 1.4 + Math.random() * 1.8,
+      Array.from({ length: 5 }, (_, i) => ({
+        x: (Math.random() * 2 - 1) * 11,
+        z: -11 - i * 0.7,
+        y: 5.7 + Math.random() * 2.1,
+        scale: 0.72 + Math.random() * 0.48,
         seed: i,
       })),
     [],
   );
 
-  useFrame((_, delta) => {
+  useFrame(({ clock }, delta) => {
     if (!groupRef.current) return;
     groupRef.current.position.x += windX * delta * 0.05;
     groupRef.current.position.z += windZ * delta * 0.05;
     if (Math.abs(groupRef.current.position.x) > 20) groupRef.current.position.x *= -0.98;
     if (Math.abs(groupRef.current.position.z) > 20) groupRef.current.position.z *= -0.98;
+    materialsRef.current.forEach((material) => {
+      material.time = clock.elapsedTime;
+    });
   });
 
   if (coverage < 0.08) return null;
@@ -243,12 +296,19 @@ export function CloudPuffs({ coverage, windX, windZ, tint }: CloudPuffsProps) {
     <group ref={groupRef}>
       {puffs.map((puff) => (
         <group key={puff.seed} position={[puff.x, puff.y, puff.z]} scale={puff.scale}>
-          {[0, 1, 2].map((i) => (
-            <mesh key={i} position={[i * 0.6 - 0.6, Math.sin(i) * 0.15, 0]}>
-              <sphereGeometry args={[0.7, 10, 10]} />
-              <meshBasicMaterial color={tint} transparent opacity={coverage * 0.32} depthWrite={false} />
-            </mesh>
-          ))}
+          <mesh>
+            <planeGeometry args={[8.4, 1.6, 1, 1]} />
+            <cloudRibbonMaterial
+              ref={(material) => {
+                if (material && !materialsRef.current.includes(material)) materialsRef.current.push(material);
+              }}
+              key={CloudRibbonMaterial.key}
+              tint={cloudColor}
+              opacity={coverage * 0.18}
+              transparent
+              depthWrite={false}
+            />
+          </mesh>
         </group>
       ))}
     </group>

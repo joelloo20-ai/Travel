@@ -51,9 +51,9 @@ export function TexturedBox({
     const facade = new THREE.MeshStandardMaterial({
       map: colorMap,
       emissiveMap,
-      emissive: '#ffffff',
-      emissiveIntensity: nightLights * 1.1,
-      roughness: facadeRoughness,
+      emissive: '#d8ae77',
+      emissiveIntensity: nightLights * 0.58,
+      roughness: Math.max(facadeRoughness, 0.58),
       metalness: facadeMetalness,
     });
     const roof = new THREE.MeshStandardMaterial({ color: '#1c2229', roughness: 0.8, metalness: 0.1 });
@@ -73,6 +73,7 @@ function Building({ b, index, glowColor, nightLights }: { b: BuildingSpec; index
   const seed = index * 0.618 + b.height * 0.13 + hashSeed(b.color);
   const hasRoofDetail = index % 3 === 0;
   const hasSetback = index % 4 === 1 && b.height > 1.6;
+  const hasSpire = index % 5 === 2 && b.height > 2.2;
 
   return (
     <group position={[b.x, 0, b.z]}>
@@ -89,12 +90,24 @@ function Building({ b, index, glowColor, nightLights }: { b: BuildingSpec; index
           <meshStandardMaterial color="#2a3138" roughness={0.8} />
         </mesh>
       )}
+      {hasSpire && (
+        <group position={[b.width * -0.16, b.height + 0.17, b.depth * 0.05]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.018, 0.028, 0.32, 8]} />
+            <meshStandardMaterial color="#536069" roughness={0.48} metalness={0.6} />
+          </mesh>
+          <mesh position={[0, 0.18, 0]}>
+            <sphereGeometry args={[0.035, 10, 10]} />
+            <meshStandardMaterial color={glowColor} emissive={glowColor} emissiveIntensity={nightLights * 0.45} toneMapped={false} />
+          </mesh>
+        </group>
+      )}
       <mesh position={[0, b.height + 0.005, 0]}>
         <boxGeometry args={[b.width * 0.98, 0.01, b.depth * 0.98]} />
         <meshStandardMaterial
           color={glowColor}
           emissive={glowColor}
-          emissiveIntensity={nightLights * 1.4}
+          emissiveIntensity={nightLights * 0.32}
           toneMapped={false}
         />
       </mesh>
@@ -309,12 +322,12 @@ export function BridgeSpan({ length, deckWidth, towerHeight, style, color, glowC
         <boxGeometry args={[length, 0.04, deckWidth]} />
         <meshStandardMaterial color={color} roughness={0.6} metalness={0.4} />
       </mesh>
-      <mesh position={[0, 0.005, 0]}>
-        <boxGeometry args={[length * 0.98, 0.006, deckWidth * 0.15]} />
+      <mesh position={[0, 0.052, 0]}>
+        <boxGeometry args={[length * 0.985, 0.032, deckWidth * 0.62]} />
         <meshStandardMaterial
           color={glowColor}
           emissive={glowColor}
-          emissiveIntensity={0.5 + nightLights * 2}
+          emissiveIntensity={1.55 + nightLights * 3.4}
           toneMapped={false}
         />
       </mesh>
@@ -330,7 +343,7 @@ export function BridgeSpan({ length, deckWidth, towerHeight, style, color, glowC
           <group key={towerIndex} position={[x, 0, 0]}>
             <mesh position={[0, towerHeight / 2, 0]} castShadow>
               <boxGeometry args={[0.035, towerHeight, 0.035]} />
-              <meshStandardMaterial color={color} roughness={0.5} metalness={0.5} />
+              <meshStandardMaterial color={glowColor} emissive={glowColor} emissiveIntensity={0.45 + nightLights * 1.2} roughness={0.32} metalness={0.6} toneMapped={false} />
             </mesh>
             {Array.from({ length: 7 }).map((_, cableIndex) => {
               const t = (cableIndex + 1) / 8;
@@ -341,7 +354,7 @@ export function BridgeSpan({ length, deckWidth, towerHeight, style, color, glowC
               return (
                 <line key={cableIndex}>
                   <primitive object={cableGeometry} attach="geometry" />
-                  <lineBasicMaterial color="#e7e2d6" transparent opacity={0.4} />
+                  <lineBasicMaterial color={glowColor} transparent opacity={0.86 + nightLights * 0.12} toneMapped={false} />
                 </line>
               );
             })}

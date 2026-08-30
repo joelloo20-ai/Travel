@@ -17,6 +17,8 @@ export interface LandmarkProps {
   deep: string;
   glow: string;
   nightLights: number;
+  /** The shared diorama provides the city context; suppress local clutter in the hero. */
+  showContext?: boolean;
 }
 
 function ringOfBuildings(count: number, radius: number, minH: number, maxH: number, minW: number, maxW: number, color: string): BuildingSpec[] {
@@ -47,7 +49,7 @@ function Plinth({ radius = 1.1, height = 0.22, color = '#2b2b2b' }: { radius?: n
 // ---------------------------------------------------------------------------
 // Singapore — the Merlion, with Marina Bay Sands behind it
 // ---------------------------------------------------------------------------
-function Merlion({ accent, glow, nightLights }: LandmarkProps) {
+function Merlion({ accent, glow, nightLights, showContext = true }: LandmarkProps) {
   const jetCurve = useMemo(() => {
     const curve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(0, 1.55, 0.35),
@@ -119,7 +121,7 @@ function Merlion({ accent, glow, nightLights }: LandmarkProps) {
           <meshStandardMaterial color={glow} emissive={glow} emissiveIntensity={0.4 + nightLights * 2} toneMapped={false} />
         </mesh>
       </group>
-      <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} />
+      {showContext ? <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} /> : null}
     </group>
   );
 }
@@ -145,21 +147,29 @@ function OperaHouse({ glow, nightLights }: LandmarkProps) {
 // ---------------------------------------------------------------------------
 // Melbourne — Eureka Tower with its gold crown, above a river-city cluster
 // ---------------------------------------------------------------------------
-function EurekaTower({ accent, glow, nightLights }: LandmarkProps) {
+function EurekaTower({ accent, glow, nightLights, showContext = true }: LandmarkProps) {
   const buildings = useMemo(() => ringOfBuildings(16, 2.6, 1.2, 2.4, 0.35, 0.6, '#33414d'), []);
   return (
     <group>
       <Plinth radius={0.5} />
-      <TexturedBox width={0.85} depth={0.85} height={4.2} position={[0, 2.3, 0]} seed={11.3} nightLights={nightLights} facadeMetalness={0.5} />
-      <mesh position={[0, 4.55, 0]} castShadow>
-        <boxGeometry args={[0.92, 0.45, 0.92]} />
-        <meshStandardMaterial color={accent} roughness={0.25} metalness={0.7} emissive={accent} emissiveIntensity={0.15 + nightLights * 0.4} toneMapped={false} />
+      {/* The slender blue shaft, uneven shoulders, gold crown and red blade are the
+          structural cues that distinguish Eureka from a generic city tower. */}
+      <TexturedBox width={0.72} depth={0.62} height={3.98} position={[0, 2.1, 0]} seed={11.3} nightLights={nightLights} facadeMetalness={0.58} />
+      <TexturedBox width={0.42} depth={0.52} height={2.08} position={[-0.58, 1.14, -0.06]} seed={11.7} nightLights={nightLights * 0.42} facadeMetalness={0.38} />
+      <TexturedBox width={0.36} depth={0.48} height={1.42} position={[0.52, 0.81, 0.02]} seed={12.1} nightLights={nightLights * 0.36} facadeMetalness={0.38} />
+      <mesh position={[0, 4.34, 0]} castShadow>
+        <boxGeometry args={[0.8, 0.5, 0.68]} />
+        <meshStandardMaterial color="#c78f42" roughness={0.27} metalness={0.78} emissive={accent} emissiveIntensity={0.06 + nightLights * 0.18} toneMapped={false} />
       </mesh>
-      <mesh position={[0, 4.85, 0]}>
-        <boxGeometry args={[0.15, 0.2, 0.15]} />
-        <meshStandardMaterial color={glow} emissive={glow} emissiveIntensity={0.5 + nightLights * 2.4} toneMapped={false} />
+      <mesh position={[0.16, 4.14, 0.326]}>
+        <boxGeometry args={[0.082, 1.05, 0.014]} />
+        <meshStandardMaterial color="#bd3e35" roughness={0.34} metalness={0.42} emissive="#8e2924" emissiveIntensity={0.08 + nightLights * 0.48} />
       </mesh>
-      <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} />
+      <mesh position={[0, 4.68, 0]}>
+        <boxGeometry args={[0.18, 0.08, 0.18]} />
+        <meshStandardMaterial color={glow} emissive={glow} emissiveIntensity={0.16 + nightLights * 0.62} toneMapped={false} />
+      </mesh>
+      {showContext ? <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} /> : null}
     </group>
   );
 }
@@ -167,7 +177,7 @@ function EurekaTower({ accent, glow, nightLights }: LandmarkProps) {
 // ---------------------------------------------------------------------------
 // Guangzhou — Canton Tower's hourglass "supermodel waist"
 // ---------------------------------------------------------------------------
-function CantonTower({ glow, nightLights }: LandmarkProps) {
+function CantonTower({ glow, nightLights, showContext = true }: LandmarkProps) {
   const buildings = useMemo(() => ringOfBuildings(13, 3.2, 1, 2.2, 0.4, 0.65, '#4a2733'), []);
   return (
     <group>
@@ -184,7 +194,7 @@ function CantonTower({ glow, nightLights }: LandmarkProps) {
         podRadius={0.4}
         podHeight={3.4}
       />
-      <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} />
+      {showContext ? <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} /> : null}
     </group>
   );
 }
@@ -192,7 +202,7 @@ function CantonTower({ glow, nightLights }: LandmarkProps) {
 // ---------------------------------------------------------------------------
 // Hong Kong — dense Victoria Harbour skyline with two signature towers
 // ---------------------------------------------------------------------------
-function HkSkyline({ glow, nightLights }: LandmarkProps) {
+function HkSkyline({ glow, nightLights, showContext = true }: LandmarkProps) {
   const buildings = useMemo(() => ringOfBuildings(19, 2.2, 1.4, 3.1, 0.4, 0.7, '#242c3a'), []);
   return (
     <group>
@@ -206,7 +216,7 @@ function HkSkyline({ glow, nightLights }: LandmarkProps) {
         <boxGeometry args={[0.1, 0.15, 0.1]} />
         <meshStandardMaterial color={glow} emissive={glow} emissiveIntensity={0.5 + nightLights * 2.4} toneMapped={false} />
       </mesh>
-      <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} />
+      {showContext ? <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} /> : null}
     </group>
   );
 }
@@ -214,7 +224,7 @@ function HkSkyline({ glow, nightLights }: LandmarkProps) {
 // ---------------------------------------------------------------------------
 // Taipei — Taipei 101's tiered, flaring pagoda-tech stack
 // ---------------------------------------------------------------------------
-function Taipei101({ glow, nightLights }: LandmarkProps) {
+function Taipei101({ glow, nightLights, showContext = true }: LandmarkProps) {
   const buildings = useMemo(() => ringOfBuildings(14, 2.8, 0.9, 1.8, 0.35, 0.55, '#213326'), []);
   const tiers = useMemo(
     () =>
@@ -236,7 +246,7 @@ function Taipei101({ glow, nightLights }: LandmarkProps) {
           <meshStandardMaterial color="#9aa79e" roughness={0.4} metalness={0.6} />
         </mesh>
       </group>
-      <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} />
+      {showContext ? <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} /> : null}
     </group>
   );
 }
@@ -244,7 +254,7 @@ function Taipei101({ glow, nightLights }: LandmarkProps) {
 // ---------------------------------------------------------------------------
 // Tokyo — Tokyo Tower's red-and-white lattice
 // ---------------------------------------------------------------------------
-function TokyoTower({ glow, nightLights }: LandmarkProps) {
+function TokyoTower({ glow, nightLights, showContext = true }: LandmarkProps) {
   const buildings = useMemo(() => ringOfBuildings(16, 2.6, 1, 2.1, 0.35, 0.6, '#3a2126'), []);
   return (
     <group>
@@ -259,7 +269,7 @@ function TokyoTower({ glow, nightLights }: LandmarkProps) {
         glowColor={glow}
         nightLights={nightLights}
       />
-      <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} />
+      {showContext ? <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} /> : null}
     </group>
   );
 }
@@ -267,7 +277,7 @@ function TokyoTower({ glow, nightLights }: LandmarkProps) {
 // ---------------------------------------------------------------------------
 // Osaka — Osaka Castle's green-tiled tenshu on a stone base
 // ---------------------------------------------------------------------------
-function OsakaCastle({ glow, nightLights }: LandmarkProps) {
+function OsakaCastle({ glow, nightLights, showContext = true }: LandmarkProps) {
   const buildings = useMemo(() => ringOfBuildings(14, 3, 0.9, 1.7, 0.35, 0.55, '#432a2f'), []);
   const tiers = useMemo(
     () => [
@@ -284,7 +294,7 @@ function OsakaCastle({ glow, nightLights }: LandmarkProps) {
       <group position={[0, 0.3, 0]}>
         <PagodaTower tiers={tiers} color="#f1ede3" roofColor="#2f5c46" glowColor={glow} nightLights={nightLights} />
       </group>
-      <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} />
+      {showContext ? <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} /> : null}
     </group>
   );
 }
@@ -292,7 +302,7 @@ function OsakaCastle({ glow, nightLights }: LandmarkProps) {
 // ---------------------------------------------------------------------------
 // Seoul — N Seoul Tower atop Namsan's mound
 // ---------------------------------------------------------------------------
-function SeoulTower({ glow, nightLights }: LandmarkProps) {
+function SeoulTower({ glow, nightLights, showContext = true }: LandmarkProps) {
   const buildings = useMemo(() => ringOfBuildings(17, 3.2, 0.8, 1.8, 0.35, 0.6, '#1e2536'), []);
   return (
     <group>
@@ -314,7 +324,7 @@ function SeoulTower({ glow, nightLights }: LandmarkProps) {
           podHeight={2.1}
         />
       </group>
-      <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} />
+      {showContext ? <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} /> : null}
     </group>
   );
 }
@@ -322,7 +332,7 @@ function SeoulTower({ glow, nightLights }: LandmarkProps) {
 // ---------------------------------------------------------------------------
 // Busan — Gwangandaegyo's cable-stayed span over the water
 // ---------------------------------------------------------------------------
-function GwanganBridge({ glow, nightLights }: LandmarkProps) {
+function GwanganBridge({ glow, nightLights, showContext = true }: LandmarkProps) {
   const buildings = useMemo(
     () =>
       Array.from({ length: 8 }, (_, i) => ({
@@ -336,9 +346,9 @@ function GwanganBridge({ glow, nightLights }: LandmarkProps) {
     [],
   );
   return (
-    <group>
+    <group position={[0, 0.42, 0]}>
       <BridgeSpan length={7.5} deckWidth={0.42} towerHeight={1.9} style="cable-stayed" color="#31404c" glowColor={glow} nightLights={nightLights} />
-      <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} />
+      {showContext ? <SkyscraperCluster buildings={buildings} glowColor={glow} nightLights={nightLights} /> : null}
     </group>
   );
 }

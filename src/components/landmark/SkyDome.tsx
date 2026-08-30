@@ -7,7 +7,7 @@ const SkyMaterial = shaderMaterial(
   {
     nightColor: new THREE.Color('#050b14'),
     duskColor: new THREE.Color('#7e3141'),
-    dayColor: new THREE.Color('#8fd0e0'),
+    dayColor: new THREE.Color('#789ca0'),
     glowColor: new THREE.Color('#ffcf86'),
     dayPhase: 0,
     goldenPhase: 0,
@@ -99,7 +99,9 @@ interface SkyDomeProps {
 
 export function SkyDome({ deep, sky, glow, dayPhase, goldenPhase, sunElevation, overcast }: SkyDomeProps) {
   const materialRef = useRef<InstanceType<typeof SkyMaterial>>(null);
-  const dayColor = useMemo(() => new THREE.Color('#8fd0e0'), []);
+  // Keep daylight legible, but deliberately muted so the landmark and layered
+  // horizon retain the same illustrated, nocturnal-film atmosphere at any hour.
+  const dayColor = useMemo(() => new THREE.Color('#789ca0'), []);
   const nightColor = useMemo(() => new THREE.Color(deep), [deep]);
   const duskColor = useMemo(() => new THREE.Color(sky), [sky]);
   const glowColor = useMemo(() => new THREE.Color(glow), [glow]);
@@ -142,7 +144,9 @@ function StarField({ dayPhase }: { dayPhase: number }) {
   const materialRef = useRef<InstanceType<typeof StarFieldMaterial>>(null);
 
   const [positions, sizes] = useMemo(() => {
-    const count = 1400;
+    // A few pinpoints give the horizon scale. A dense field starts to look like
+    // falling snow once post-processing bloom is applied.
+    const count = 620;
     const pos = new Float32Array(count * 3);
     const size = new Float32Array(count);
     for (let i = 0; i < count; i++) {
@@ -152,7 +156,7 @@ function StarField({ dayPhase }: { dayPhase: number }) {
       pos[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
       pos[i * 3 + 1] = Math.abs(radius * Math.cos(phi)) + 2;
       pos[i * 3 + 2] = radius * Math.sin(phi) * Math.sin(theta);
-      size[i] = 0.6 + Math.random() * 1.6;
+      size[i] = 0.28 + Math.random() * 0.86;
     }
     return [pos, size];
   }, []);
@@ -220,6 +224,7 @@ function useMoonTexture(): THREE.CanvasTexture {
 
 function SunMoonDisc({ sunElevation, dayPhase, glow }: { sunElevation: number; dayPhase: number; glow: string }) {
   const moonTexture = useMoonTexture();
+  const moonTint = useMemo(() => new THREE.Color(glow).lerp(new THREE.Color('#f7dcc6'), 0.34), [glow]);
   const sunRef = useRef<THREE.Group>(null);
   const moonRef = useRef<THREE.Group>(null);
   const sunMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
@@ -254,8 +259,12 @@ function SunMoonDisc({ sunElevation, dayPhase, glow }: { sunElevation: number; d
       </group>
       <group ref={moonRef}>
         <mesh>
-          <sphereGeometry args={[1, 32, 32]} />
-          <meshBasicMaterial ref={moonMaterialRef} map={moonTexture} toneMapped={false} transparent depthWrite={false} />
+          <sphereGeometry args={[1.75, 24, 24]} />
+          <meshBasicMaterial color={moonTint} transparent opacity={0.065} depthWrite={false} toneMapped={false} />
+        </mesh>
+        <mesh>
+          <sphereGeometry args={[1.24, 32, 32]} />
+          <meshBasicMaterial ref={moonMaterialRef} color={moonTint} map={moonTexture} toneMapped={false} transparent depthWrite={false} />
         </mesh>
       </group>
     </>

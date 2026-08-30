@@ -16,14 +16,17 @@ export function createItineraryEntry(destination = '', date = ''): ItineraryEntr
     date,
     startTime: '',
     endTime: '',
+    duration: '',
     destination,
     placeOfInterest: '',
     category: 'Sightseeing',
-    price: '',
-    currency: 'SGD',
+    verification: 'Pending form verification',
+    actualCostSgd: '',
+    manualActualCostSgd: '',
+    howWasIt: '',
+    googleMapsLink: '',
     distanceKm: '',
     transitMode: '',
-    link: '',
     notes: '',
   };
 }
@@ -59,48 +62,84 @@ function csvCell(value: string | number | undefined): string {
   return `"${text.replaceAll('"', '""')}"`;
 }
 
+function formatSheetDate(date: string): string {
+  if (!date) return '';
+  const parsed = new Date(`${date}T12:00:00`);
+  return Number.isNaN(parsed.getTime())
+    ? date
+    : new Intl.DateTimeFormat('en-SG', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }).format(parsed);
+}
+
+function formatSheetTime(time: string): string {
+  if (!time) return '';
+  const [hours, minutes] = time.split(':').map(Number);
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return time;
+  const period = hours >= 12 ? 'pm' : 'am';
+  const hour = hours % 12 || 12;
+  return `${hour}:${String(minutes).padStart(2, '0')}${period}`;
+}
+
 export function makeTripCsv(trip: Trip): string {
   const header = [
     'Trip',
     'Start date',
     'End date',
     'Travelers',
-    'Date',
-    'Start time',
-    'End time',
-    'Destination',
-    'Place of interest',
+    'Hotel name',
+    'Hotel from date',
+    'Hotel to date',
+    'Hotel address',
+    'Hotel price paid (SGD)',
+    'Airline',
+    'Flight number',
+    'Flight route',
+    'Flight departure',
+    'Flight arrival',
+    'Flight price paid (SGD)',
+    'Day & Date',
+    'Time Range',
+    'Duration',
+    'Travel from last stop',
+    'Distance (km)',
     'Category',
-    'Price',
-    'Currency',
-    'Distance from previous activity (km)',
-    'Transit mode',
-    'Link',
-    'Activity notes',
-    'Trip notes',
-    'Document references',
+    'Planned Item',
+    'Verified from Google Form',
+    'Actual Cost (SGD)',
+    'Manual Actual Cost (SGD)',
+    'How was it?',
+    'Google Maps',
+    'Notes',
   ];
-  const documentReferences = trip.documents.map((document) => document.name).join(' | ');
   const entries = trip.itinerary.length ? trip.itinerary : [createItineraryEntry(trip.destination, trip.startDate)];
   const rows = entries.map((entry) => [
     trip.title,
     trip.startDate,
     trip.endDate,
     trip.travelers,
-    entry.date,
-    entry.startTime,
-    entry.endTime,
-    entry.destination,
-    entry.placeOfInterest,
-    entry.category,
-    entry.price,
-    entry.currency,
-    entry.distanceKm,
+    trip.hotel?.name ?? '',
+    trip.hotel?.fromDate ?? '',
+    trip.hotel?.toDate ?? '',
+    trip.hotel?.address ?? '',
+    trip.hotel?.pricePaidSgd ?? '',
+    trip.flight?.airline ?? '',
+    trip.flight?.flightNumber ?? '',
+    trip.flight?.route ?? '',
+    trip.flight?.departureTime ?? '',
+    trip.flight?.arrivalTime ?? '',
+    trip.flight?.pricePaidSgd ?? '',
+    formatSheetDate(entry.date),
+    entry.startTime && entry.endTime ? `${formatSheetTime(entry.startTime)} - ${formatSheetTime(entry.endTime)}` : formatSheetTime(entry.startTime || entry.endTime),
+    entry.duration,
     entry.transitMode,
-    entry.link,
+    entry.distanceKm,
+    entry.category,
+    entry.placeOfInterest,
+    entry.verification,
+    entry.actualCostSgd,
+    entry.manualActualCostSgd,
+    entry.howWasIt,
+    entry.googleMapsLink,
     entry.notes,
-    trip.notes,
-    documentReferences,
   ]);
 
   return [header, ...rows].map((row) => row.map(csvCell).join(',')).join('\n');

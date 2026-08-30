@@ -84,7 +84,9 @@ interface WaterProps {
 export function Water({ deep, sky, glow, dayPhase, choppiness, size = 40 }: WaterProps) {
   const materialRef = useRef<InstanceType<typeof WaterMaterial>>(null);
   const deepColor = useMemo(() => new THREE.Color(deep), [deep]);
-  const surfaceColor = useMemo(() => new THREE.Color(sky), [sky]);
+  // City water is a reflector, not a second bright sky plane. Keeping it close
+  // to the deep tone lets the sparse moving highlights carry the atmosphere.
+  const surfaceColor = useMemo(() => new THREE.Color(sky).lerp(new THREE.Color(deep), 0.42), [deep, sky]);
   const sunColor = useMemo(() => new THREE.Color(glow), [glow]);
 
   useFrame(({ clock }) => {
@@ -100,6 +102,7 @@ export function Water({ deep, sky, glow, dayPhase, choppiness, size = 40 }: Wate
         ref={materialRef}
         key={WaterMaterial.key}
         transparent
+        depthWrite={false}
         deepColor={deepColor}
         surfaceColor={surfaceColor}
         sunColor={sunColor}

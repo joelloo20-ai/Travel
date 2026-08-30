@@ -11,15 +11,35 @@ export interface ItineraryEntry {
   date: string;
   startTime: string;
   endTime: string;
+  duration: string;
   destination: string;
   placeOfInterest: string;
   category: string;
-  price: string;
-  currency: string;
+  verification: string;
+  actualCostSgd: string;
+  manualActualCostSgd: string;
+  howWasIt: string;
+  googleMapsLink: string;
   distanceKm: string;
   transitMode: string;
-  link: string;
   notes: string;
+}
+
+export interface StayDetails {
+  name: string;
+  fromDate: string;
+  toDate: string;
+  address: string;
+  pricePaidSgd: string;
+}
+
+export interface FlightDetails {
+  airline: string;
+  flightNumber: string;
+  route: string;
+  departureTime: string;
+  arrivalTime: string;
+  pricePaidSgd: string;
 }
 
 export interface Trip {
@@ -30,6 +50,8 @@ export interface Trip {
   endDate: string;
   travelers: string;
   notes: string;
+  hotel: StayDetails;
+  flight: FlightDetails;
   itinerary: ItineraryEntry[];
   documents: TripDocument[];
   createdAt: string;
